@@ -39,29 +39,34 @@ This is my `Dockerfile`:
 
     CMD [ "python", "./FakeREST_API.py" ]
 
-After the build, the imaage should be `~71Mb`.
+After the build, the imaage should be `~78Mb`.
 
 ```sh
 docker build -t fakeapi .
 ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Run the project with the data file inside the container.
 The data will be lost when the container exits.
 ```sh
 docker run -it --rm -p 8000:8000 --name fakeapi fakeapi
 ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Run the project with the data file on the Docker host.
 Mount the container `/usr/src/data` directory on the current directory of the host. Data will be on the Docker host when the container exits.
 ```sh
 docker run -it --rm -v $PWD:/usr/src/data -p 8000:8000 --name fakeapi fakeapi
 ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Shell access
 Get shell access to the container with the `/usr/src/data` directory mounted on the current directory of the host.
 ```sh
 docker run -it --rm -v $PWD:/usr/src/data fakeapi /bin/sh
 ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- LICENSE -->
 ## License
 Distributed under the MIT License. See `LICENSE.txt` for more information.
@@ -80,6 +85,7 @@ Project Link: [https://github.com/ddella/FakeAPI](https://github.com/ddella/Fake
 * [Real Python tutorial](https://realpython.com/fastapi-python-web-apis/#learn-more-about-fastapi)
 * [REST API status code](https://restfulapi.net/http-status-codes/)
 * [REST API method](https://restfulapi.net/http-methods/)
+* [Best-README-Template](https://github.com/othneildrew/Best-README-Template/pull/73)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
