@@ -3,16 +3,16 @@
 
 # What is FakeAPI
 
-FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no testing to keep the code small.
+FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no testing to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, like [MuleSoft](https://www.mulesoft.com/).
 
-Doesn't implement XML, returns JSON objects only.
+>Implements only `JSON` objects. Sorry no `XML` 😉
 
-The script requires the following modules:
+The script requires the following Python modules:
 * pydantic
 * uvicorn
 * fastapi
 
-REST API methods implemented:
+REST API methods implemented in FakeAPI:
 * **HTTP GET** to retrieve information
 * **HTTP POST** to create a new resource
 * **HTTP PUT** to Update/Replace a resource
