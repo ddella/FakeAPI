@@ -1,0 +1,9 @@
+.DS_Store
+**/.DS_Store
+.gitignore.swp
+.env
+00_Readme.txt
+blank-README.md
+*.pptx
+*.docx
+*.xlsx
