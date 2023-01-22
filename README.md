@@ -46,6 +46,11 @@ docker build -t fakeapi .
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+# Run the project
+You can run the container with the database inside it. As soon as you exit the container the data will be lost. You can map (`bind`) a local directory of the host inside the container. This way you keep the data after the container exist.
+
+>Use an appropriate `hostname` if you start multiple containers. This is the only unique ID I found, as the process ID is alway `1` when the script runs inside the container. The logs will print the `hostname` so you know which container did what. Remember I made this script to test API Gateways.
+
 ## Run the project with the data file inside the container.
 The data will be lost when the container exits.
 ```sh
