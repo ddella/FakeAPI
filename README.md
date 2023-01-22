@@ -181,6 +181,28 @@ If the object was not found, it returns HTTP status code 404:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- TRACE Example -->
+## Example with TRACE method
+The `TRACE` method is used for diagnosis purposes. It creates a loop-back test with the same request header that the client sent to the server. The `TRACE` method is safe, idempotent and returns successful response code `200 OK`.
+
+```shell
+curl -X TRACE -H "Content-type: application/json" \
+    -H "Accept: application/json" -H "trace: trace-method-test"\
+    -i -L "http://localhost:8000/"
+```
+
+This will send a `TRACE` request to the server and it will reply with the header of received from the client:
+
+    HTTP/1.1 200 OK
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    content-length: 153
+    content-type: application/json
+
+    {"header":{"host":"localhost:8000","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"}}
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- LICENSE -->
 ## License
 Distributed under the MIT License. See `LICENSE.txt` for more information.
