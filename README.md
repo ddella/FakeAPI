@@ -67,6 +67,79 @@ docker run -it --rm --hostname fakeapi1 -v $PWD:/usr/src/data fakeapi /bin/sh
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- Docs -->
+## Docs URLs
+You can check the the interactive documentations made available by swagger UI at `http://localhost:8000/docs`.
+
+![Documentation](images/docs.jpg)
+
+
+<!-- tests -->
+# let's get our hands dirty
+The best way to test the APIs is with cURL.
+<!-- GET Example -->
+## Example with GET method
+Use this command to query of an object by it's ID:
+```shell
+curl -H "Content-type: application/json" \
+    -H "Accept: application/json" \
+    -i -L "http://localhost:8000/id/562641783"
+```
+This will send a `GET` request to the server. If it finds the object, the server returns the object in `JSON` format like this:
+
+    HTTP/1.1 200 OK
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    content-length: 91
+    content-type: application/json
+
+    [{"id":"333333333","description":"This is a new description","price":666.66,"quantity":33}]
+
+If the object is not found, it returns HTTP status code 404:
+
+    HTTP/1.1 404 Not Found
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    x-fake-rest-api: ID 000000000 not found
+    content-length: 35
+    content-type: application/json
+
+    {"detail":"ID 000000000 not found"}
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- POST Example -->
+## Example with POST method
+Use this command to add a new object:
+```shell
+curl -X POST -H "Content-type: application/json" \
+    -H "Accept: application/json" \
+    -d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
+    -i -L "http://localhost:8000/addItem/"
+```
+
+This will send a `POST` request to the server. If it finds the object, the server returns an error. If it doesn't find the object, it adds it to the database:
+
+    HTTP/1.1 201 Created
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    content-length: 122
+    content-type: application/json
+
+    {"success":"data added","newobject":{"id":"123456789","description":"This is a description","price":99.99,"quantity":100}}
+
+If the object was found, it returns HTTP status code 409:
+
+    HTTP/1.1 409 Conflict
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    x-fake-rest-api: Object 123456789 exists at localhost.local, use PUT or PATCH
+    content-length: 75
+    content-type: application/json
+
+    {"detail":"Object 123456789 exists at localhost.local, use PUT or PATCH"}
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- LICENSE -->
 ## License
 Distributed under the MIT License. See `LICENSE.txt` for more information.
