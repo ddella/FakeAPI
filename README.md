@@ -18,6 +18,7 @@ REST API methods implemented in FakeAPI:
 * **HTTP PUT** to Update/Replace a resource
 * **HTTP DELETE** to delete a resource
 * **HTTP PATCH** to make a Partial Update/Modify
+* **HTTP TRACE** server reply with the header received
 
 # How to use this image
 ## This is for educationnal **only**!
@@ -194,12 +195,13 @@ curl -X TRACE -H "Content-type: application/json" \
 This will send a `TRACE` request to the server and it will reply with the header of received from the client:
 
     HTTP/1.1 200 OK
-    date: Sun, 01 Jan 2023 00:00:00 GMT
+    date: Sun, 22 Jan 2023 20:48:50 GMT
     server: uvicorn
-    content-length: 153
+    x-fake-api-trace: client header returned
+    content-length: 184
     content-type: application/json
 
-    {"header":{"host":"localhost:8000","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"}}
+    {"header":{"host":"localhost:8000","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"},"hostname":"localhost.local"}
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
