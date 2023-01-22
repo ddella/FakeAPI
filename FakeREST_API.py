@@ -33,12 +33,19 @@ import json
 import os
 import uvicorn
 import platform
+from enum import Enum
 
 class Item(BaseModel):
     id: str
     description: str
     price: float
     quantity: int
+
+# The URLs for the 'patchItem' function
+class PatchURL(str, Enum):
+    price = "price"
+    quantity = "quantity"
+    description = "description"
 
 
 # Simulation of our database
@@ -212,7 +219,30 @@ async def deleteItem(item: dict):
             headers={"X-Fake-REST-API": strError},
         )
 
-@app.patch('/patchItem/price/', status_code=200)
+@app.patch('/patchItem/{patchURL}/', status_code=200)
+async def patchItem(patchURL: PatchURL, item: dict):
+    """
+    This is the main entry point for URI: /patchItem/{patchURL}
+    This function calls the corresponding function based on the URI
+    :param patchURL: Check the class 'PatchURL' for possible valaues
+    :param item: The new value to modify
+    :return:
+    """
+    # URL = /patchItem/price/
+    if patchURL is patchURL.price:
+        # Partial update of an object, if it doesn't exist than throw an error
+        await patchItemPrice(item)
+
+    # URL = /patchItem/quantity/
+    if patchURL is patchURL.quantity:
+        # Partial update of an object, if it doesn't exist than throw an error
+        await patchItemQuantity(item)
+
+    # URL = /patchItem/description/
+    if patchURL is patchURL.description:
+        # Partial update of an object, if it doesn't exist than throw an error
+        await patchItemDescription(item)
+
 async def patchItemPrice(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
@@ -245,7 +275,6 @@ async def patchItemPrice(item: dict):
             headers={"X-Fake-REST-API": strError},
         )
 
-@app.patch('/patchItem/quantity/', status_code=200)
 async def patchItemQuantity(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
@@ -259,12 +288,43 @@ async def patchItemQuantity(item: dict):
     :return:
     """
     # Partial update of an object, if it doesn't exist than throw an error
-    # Partial update of an object, if it doesn't exist than throw an error
     index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
     if index:
         # Update element of an object from the start (index = 0)
         importedSyntheticData[index[0]]['quantity'] = item.get('newquantity')
         strSuccess = f'Update of "quantity" successful for item {importedSyntheticData[index[0]]}.'
+        strSuccess += f'Hostname: {platform.node()}'
+        logging.info(strSuccess)
+        # write data to file
+        writeJSON(data, importedSyntheticData)
+        return {'success': strSuccess, 'item': importedSyntheticData[index[0]]}
+    else:
+        logging.info(f'Object wasn\'t found on {platform.node()}')
+        strError = f'Item {item} was not found'
+        raise HTTPException(
+            status_code=404,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+async def patchItemDescription(item: dict):
+    """
+    Use PATCH APIs to make a partial update on a ressource.
+    If ressource doesn't exist, throw an error.
+    URI: http://localhost:8000/patchItem/description/
+    Example with curl:
+        curl -X PATCH -H "Content-type: application/json" \
+        -H "Accept: application/json" \
+        -d '{"id":"123456789", "newdescription": "This is a new description"}' \
+        -i -L "http://localhost:8000/patchItem/description/"
+    :return:
+    """
+    # Partial update of an object, if it doesn't exist than throw an error
+    index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
+    if index:
+        # Update element of an object from the start (index = 0)
+        importedSyntheticData[index[0]]['description'] = item.get('newdescription')
+        strSuccess = f'Update of "description" successful for item {importedSyntheticData[index[0]]}.'
         strSuccess += f'Hostname: {platform.node()}'
         logging.info(strSuccess)
         # write data to file
