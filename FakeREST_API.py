@@ -251,8 +251,8 @@ async def patchItem(patchURL: PatchURL, item: dict):
         val = patchItemDescription(item)
         return val
 
-@app.trace("/", status_code=200)
-async def trace(request: Request):
+@app.trace("/{full_path:path}", status_code=200)
+async def trace(request: Request, full_path: str):
     """
     The TRACE method is for diagnosis purposes. It creates a loop-back test with the same request header that
     the client sent to the server. The TRACE method is safe, idempotent and returns successful response code 200 OK.
@@ -263,7 +263,11 @@ async def trace(request: Request):
     :return: The header sent by the client
     """
     clientHeader = dict(request.headers.items())
-    return {"header": clientHeader}
+    headers = {"X-Fake-API-trace": "client header returned"}
+    content = {"header": clientHeader, "hostname": platform.node()}
+    if full_path:
+        content.update({"path-error": full_path})
+    return JSONResponse(content=content, headers=headers)
 
 def patchItemPrice(item: dict):
     """
