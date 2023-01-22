@@ -26,7 +26,8 @@ https://restfulapi.net/http-status-codes/
 REST API method
 https://restfulapi.net/http-methods/
 """
-from fastapi import FastAPI, HTTPException, Response, status
+from fastapi import FastAPI, HTTPException, Response, status, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import logging
 import json
@@ -77,8 +78,11 @@ async def healthcheck():
         -i -L "http://localhost:8000/healthcheck"
     :return: 200
     """
-    # Returns 200, but you could add mode code for specific test on a database, as an example
-    return {"Health": "OK", "PID": os.getpid(), "hostname": platform.node()}
+    # Returns 200, but you could add more code for specific test
+    # As an exxample, you could test a database connectivity
+    content = {"Health": "OK", "PID": os.getpid(), "hostname": platform.node()}
+    headers = {"X-Fake-API": "/healthcheck", "Content-Language": "en-US"}
+    return JSONResponse(content=content, headers=headers)
 
 @app.get("/errorCode/{code}")
 async def errorCode(code: int):
@@ -247,6 +251,20 @@ async def patchItem(patchURL: PatchURL, item: dict):
         val = patchItemDescription(item)
         return val
 
+@app.trace("/", status_code=200)
+async def trace(request: Request):
+    """
+    The TRACE method is for diagnosis purposes. It creates a loop-back test with the same request header that
+    the client sent to the server. The TRACE method is safe, idempotent and returns successful response code 200 OK.
+    Example with curl:
+        curl -X TRACE -H "Content-type: application/json" \
+        -H "Accept: application/json" -H "trace: trace-method-test"\
+        -i -L "http://localhost:8000/"
+    :return: The header sent by the client
+    """
+    clientHeader = dict(request.headers.items())
+    return {"header": clientHeader}
+
 def patchItemPrice(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
@@ -271,8 +289,8 @@ def patchItemPrice(item: dict):
         writeJSON(data, importedSyntheticData)
         return {'success': 'Update of price successful', 'item': importedSyntheticData[index[0]]}
     else:
-        logging.info(f'Object was not found on {platform.node()}')
-        strError = f'Object was not found on {platform.node()}'
+        logging.info(f'Object was not found on {platform.node()} in patchItemPrice')
+        strError = f'Object was not found on {platform.node()} in patchItemPrice'
         raise HTTPException(
             status_code=404,
             detail=strError,
@@ -303,8 +321,8 @@ def patchItemQuantity(item: dict):
         writeJSON(data, importedSyntheticData)
         return {'success': 'Update of quantity successful', 'item': importedSyntheticData[index[0]]}
     else:
-        logging.info(f'Object wasn\'t found on {platform.node()}')
-        strError = f'Item {item} was not found'
+        logging.info(f'Object was not found on {platform.node()} in patchItemQuantity')
+        strError = f'Object was not found on {platform.node()} in patchItemQuantity'
         raise HTTPException(
             status_code=404,
             detail=strError,
@@ -335,8 +353,8 @@ def patchItemDescription(item: dict):
         writeJSON(data, importedSyntheticData)
         return {'success': 'Update of description successful', 'item': importedSyntheticData[index[0]]}
     else:
-        logging.info(f'Object wasn\'t found on {platform.node()}')
-        strError = f'Item {item} was not found'
+        logging.info(f'Object was not found on {platform.node()} in patchItemDescription')
+        strError = f'Object was not found on {platform.node()} in patchItemDescription'
         raise HTTPException(
             status_code=404,
             detail=strError,
