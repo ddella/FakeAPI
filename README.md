@@ -140,6 +140,40 @@ If the object was not found, it returns HTTP status code 409:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- PATCH Example -->
+## Example with PATCH method
+The `PATCH` is used for partial update of an existing object:
+
+```shell
+curl -X PATCH -H "Content-type: application/json" \
+    -H "Accept: application/json" \
+    -d '{"id":"123456789", "newprice": 666.66}' \
+    -i -L "http://localhost:8000/patchItem/price/"
+```
+
+This will send a `PATCH` request to the server. If it finds the object, the server updates only the `price`. If it doesn't find the object, an error is returned:
+
+    HTTP/1.1 200 OK
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    content-length: 132
+    content-type: application/json
+
+    {"success":"Update of price successful","item":{"id":"123456789","description":"This is a description","price":33.0,"quantity":100}}
+
+If the object was not found, it returns HTTP status code 404:
+
+    HTTP/1.1 404 Not Found
+    date: Sun, 01 Jan 2023 00:00:00 GMT
+    server: uvicorn
+    x-fake-rest-api: Object was not found on localhost.local
+    content-length: 54
+    content-type: application/json
+
+    {"detail":"Object was not found on localhost.local"}
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- LICENSE -->
 ## License
 Distributed under the MIT License. See `LICENSE.txt` for more information.

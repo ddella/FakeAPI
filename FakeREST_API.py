@@ -53,7 +53,8 @@ importedSyntheticData = list()
 # The file that has the full data for this example
 data = 'data.json'
 # data = '/usr/src/data/data.json'
-app = FastAPI()
+# Swagger UI to be served at /docs and disable ReDoc:
+app = FastAPI(docs_url="/docs", redoc_url=None)
 
 @app.get("/", status_code=200)
 async def root():
@@ -101,7 +102,7 @@ async def errorCode(code: int):
 @app.get("/id/{identification}", status_code=200)
 async def getItem(identification: str):
     """
-    Query the database for a specific key/value.
+    Query the database for a specific object
     URI: http://localhost/id/{identification}
     Example with curl:
       curl -H "Content-type: application/json" \
@@ -138,10 +139,10 @@ async def addItem(item: Item):
     record = [aDict for aDict in importedSyntheticData if item.id in aDict.values()]
     if record:
         # Object already exists, throw an error
-        logging.info(f'Object {item.id} exists at {platform.node()}, use PUT or PATCH.')
-        strError = f'Item {item.id} exists'
+        logging.info(f'Object {item.id} exists at {platform.node()}, use PUT or PATCH')
+        strError = f'Object {item.id} exists at {platform.node()}, use PUT or PATCH'
         raise HTTPException(
-            status_code=404,
+            status_code=409,
             detail=strError,
             headers={"X-Fake-REST-API": strError},
         )
@@ -201,7 +202,7 @@ async def deleteItem(item: dict):
         -i -L "http://localhost:8000/deleteItem/id/"
     :return:
     """
-    # DELETE an object, if it doesn't exist than throw an error
+    # DELETE an object, if it doesn't exist then throw an error
     index = [i for i, aDict in enumerate(importedSyntheticData) if item.get("id") in aDict.values()]
     if index:
         record = importedSyntheticData.pop(index[0])
@@ -230,20 +231,23 @@ async def patchItem(patchURL: PatchURL, item: dict):
     """
     # URL = /patchItem/price/
     if patchURL is patchURL.price:
-        # Partial update of an object, if it doesn't exist than throw an error
-        await patchItemPrice(item)
+        # Partial update of an object, if it doesn't exist then throw an error
+        val = patchItemPrice(item)
+        return val
 
     # URL = /patchItem/quantity/
     if patchURL is patchURL.quantity:
-        # Partial update of an object, if it doesn't exist than throw an error
-        await patchItemQuantity(item)
+        # Partial update of an object, if it doesn't exist then throw an error
+        val = patchItemQuantity(item)
+        return val
 
     # URL = /patchItem/description/
     if patchURL is patchURL.description:
-        # Partial update of an object, if it doesn't exist than throw an error
-        await patchItemDescription(item)
+        # Partial update of an object, if it doesn't exist then throw an error
+        val = patchItemDescription(item)
+        return val
 
-async def patchItemPrice(item: dict):
+def patchItemPrice(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
@@ -255,27 +259,27 @@ async def patchItemPrice(item: dict):
         -i -L "http://localhost:8000/patchItem/price/"
     :return:
     """
-    # Partial update of an object, if it doesn't exist than throw an error
+    # Partial update of an object, if it doesn't exist then throw an error
     index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
     if index:
         # Update element of an object from the start (index = 0)
         importedSyntheticData[index[0]]['price'] = item.get('newprice')
-        strSuccess = f'Update of "price" successful for item {importedSyntheticData[index[0]]}.'
-        strSuccess += f'Hostname: {platform.node()}'
+        strSuccess = f'Update of "price" successful for item {importedSyntheticData[index[0]]} on'
+        strSuccess += f' {platform.node()}'
         logging.info(strSuccess)
         # write data to file
         writeJSON(data, importedSyntheticData)
-        return {'success': strSuccess, 'item': importedSyntheticData[index[0]]}
+        return {'success': 'Update of price successful', 'item': importedSyntheticData[index[0]]}
     else:
-        logging.info(f'Object wasn\'t found on {platform.node()}')
-        strError = f'Item {item} was not found'
+        logging.info(f'Object was not found on {platform.node()}')
+        strError = f'Object was not found on {platform.node()}'
         raise HTTPException(
             status_code=404,
             detail=strError,
             headers={"X-Fake-REST-API": strError},
         )
 
-async def patchItemQuantity(item: dict):
+def patchItemQuantity(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
@@ -287,7 +291,7 @@ async def patchItemQuantity(item: dict):
         -i -L "http://localhost:8000/patchItem/quantity/"
     :return:
     """
-    # Partial update of an object, if it doesn't exist than throw an error
+    # Partial update of an object, if it doesn't exist then throw an error
     index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
     if index:
         # Update element of an object from the start (index = 0)
@@ -297,7 +301,7 @@ async def patchItemQuantity(item: dict):
         logging.info(strSuccess)
         # write data to file
         writeJSON(data, importedSyntheticData)
-        return {'success': strSuccess, 'item': importedSyntheticData[index[0]]}
+        return {'success': 'Update of quantity successful', 'item': importedSyntheticData[index[0]]}
     else:
         logging.info(f'Object wasn\'t found on {platform.node()}')
         strError = f'Item {item} was not found'
@@ -307,7 +311,7 @@ async def patchItemQuantity(item: dict):
             headers={"X-Fake-REST-API": strError},
         )
 
-async def patchItemDescription(item: dict):
+def patchItemDescription(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
@@ -319,7 +323,7 @@ async def patchItemDescription(item: dict):
         -i -L "http://localhost:8000/patchItem/description/"
     :return:
     """
-    # Partial update of an object, if it doesn't exist than throw an error
+    # Partial update of an object, if it doesn't exist then throw an error
     index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
     if index:
         # Update element of an object from the start (index = 0)
@@ -329,7 +333,7 @@ async def patchItemDescription(item: dict):
         logging.info(strSuccess)
         # write data to file
         writeJSON(data, importedSyntheticData)
-        return {'success': strSuccess, 'item': importedSyntheticData[index[0]]}
+        return {'success': 'Update of description successful', 'item': importedSyntheticData[index[0]]}
     else:
         logging.info(f'Object wasn\'t found on {platform.node()}')
         strError = f'Item {item} was not found'
