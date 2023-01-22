@@ -127,7 +127,7 @@ This will send a `POST` request to the server. If it finds the object, the serve
 
     {"success":"data added","newobject":{"id":"123456789","description":"This is a description","price":99.99,"quantity":100}}
 
-If the object was found, it returns HTTP status code 409:
+If the object was not found, it returns HTTP status code 409:
 
     HTTP/1.1 409 Conflict
     date: Sun, 01 Jan 2023 00:00:00 GMT
