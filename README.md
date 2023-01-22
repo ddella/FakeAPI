@@ -54,7 +54,7 @@ docker run -it --rm -p 8000:8000 --name fakeapi --hostname fakeapi1 fakeapi
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Run the project with the data file on the Docker host.
-Mount the container `/usr/src/data` directory on the current directory of the host. Data will be on the Docker host when the container exits.
+Mount the container `/usr/src/data` directory on the current directory of the host. Data will be on the Docker host when the container exits. The container also run in interactive mode because of the `-it` switch. This way you can look at the logs.
 ```sh
 docker run -it --rm -v $PWD:/usr/src/data -p 8000:8000 --name fakeapi --hostname fakeapi1 fakeapi
 ```
