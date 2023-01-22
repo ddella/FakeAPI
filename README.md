@@ -49,21 +49,21 @@ docker build -t fakeapi .
 ## Run the project with the data file inside the container.
 The data will be lost when the container exits.
 ```sh
-docker run -it --rm -p 8000:8000 --name fakeapi fakeapi
+docker run -it --rm -p 8000:8000 --name fakeapi --hostname fakeapi1 fakeapi
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Run the project with the data file on the Docker host.
 Mount the container `/usr/src/data` directory on the current directory of the host. Data will be on the Docker host when the container exits.
 ```sh
-docker run -it --rm -v $PWD:/usr/src/data -p 8000:8000 --name fakeapi fakeapi
+docker run -it --rm -v $PWD:/usr/src/data -p 8000:8000 --name fakeapi --hostname fakeapi1 fakeapi
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Shell access
 Get shell access to the container with the `/usr/src/data` directory mounted on the current directory of the host.
 ```sh
-docker run -it --rm -v $PWD:/usr/src/data fakeapi /bin/sh
+docker run -it --rm --hostname fakeapi1 -v $PWD:/usr/src/data fakeapi /bin/sh
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

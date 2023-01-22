@@ -44,8 +44,8 @@ class Item(BaseModel):
 # Simulation of our database
 importedSyntheticData = list()
 # The file that has the full data for this example
-# data = 'data1.json'
-data = '/usr/src/data/data.json'
+data = 'data.json'
+# data = '/usr/src/data/data.json'
 app = FastAPI()
 
 @app.get("/", status_code=200)
@@ -57,7 +57,7 @@ async def root():
         -i -L "http://localhost:8000/"
     :return:
     """
-    return {"message": "Root of Fake REST API"}
+    return {"message": "Root of Fake REST API", "hostname": platform.node()}
 
 @app.get("/healthcheck", status_code=200)
 async def healthcheck():
@@ -70,7 +70,7 @@ async def healthcheck():
     :return: 200
     """
     # Returns 200, but you could add mode code for specific test on a database, as an example
-    return {"Health": "OK", "PID": os.getpid()}
+    return {"Health": "OK", "PID": os.getpid(), "hostname": platform.node()}
 
 @app.get("/errorCode/{code}")
 async def errorCode(code: int):
@@ -83,8 +83,8 @@ async def errorCode(code: int):
         -i -L "http://localhost:8000/errorCode/404"
     :return:
     """
-    logging.info(f'Code = {code} PID: {os.getpid()}')
-    strError = f"Error code {code} from PID {os.getpid()}"
+    logging.info(f'Code = {code} from {platform.node()}')
+    strError = f"Error code {code} from {platform.node()}"
     raise HTTPException(
         status_code=code,
         detail=strError,
@@ -102,17 +102,18 @@ async def getItem(identification: str):
       -i -L "http://localhost:8000/id/562641783"
     :return: {"id":"xx","description":"A description","price":15.67,"quantity":32}
     """
-    for record in importedSyntheticData:
-        if record.get('id') == identification:
-            logging.info(f'Success PID {os.getpid()}')
-            return record
-    logging.info(f'PID: {os.getpid()}')
-    strError = f"ID {identification} not found"
-    raise HTTPException(
-        status_code=404,
-        detail=strError,
-        headers={"X-Fake-REST-API": strError},
-    )
+    record = [d for d in importedSyntheticData if d.get('id') == identification]
+    if record:
+        logging.info(f'Found ID {identification} from {platform.node()}')
+        return record
+    else:
+        logging.info(f'ID {identification} was NOT found from {platform.node()}')
+        strError = f"ID {identification} not found"
+        raise HTTPException(
+            status_code=404,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
 @app.post('/addItem/', status_code=201)
 async def addItem(item: Item):
@@ -127,10 +128,10 @@ async def addItem(item: Item):
     :param item: The new object
     :return: status code and new object, if creation successful
     """
-    foundResult = [aDict for aDict in importedSyntheticData if item.id in aDict.values()]
-    if foundResult:
-        # Object was found, throw an error
-        logging.info(f'Error: Object {item.id} exists use PUT or PATCH. PID: {os.getpid()}')
+    record = [aDict for aDict in importedSyntheticData if item.id in aDict.values()]
+    if record:
+        # Object already exists, throw an error
+        logging.info(f'Object {item.id} exists at {platform.node()}, use PUT or PATCH.')
         strError = f'Item {item.id} exists'
         raise HTTPException(
             status_code=404,
@@ -143,7 +144,7 @@ async def addItem(item: Item):
         importedSyntheticData.append(newDict)
         # write data to file
         writeJSON(data, importedSyntheticData)
-        logging.info(f'PID: {os.getpid()}')
+        logging.info(f'Object {item} added at {platform.node()}')
         return {'success': 'data added', 'newobject': newDict}
 
 @app.put('/updateItem/', status_code=200)
@@ -155,35 +156,34 @@ async def update_item(item: Item, response: Response):
     Example with curl:
         curl -X PUT -H "Content-type: application/json" \
         -H "Accept: application/json" \
-        --d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
+        -d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
         -i -L "http://localhost:8000/updateItem/"
     :param response: 200 for updated item or 201 for creating item
     :param item: A dictionnary with the new item
     :return:
     """
     newDict = item.dict()
-    i = 0  # sentinelle
-    for record in importedSyntheticData:
-        if record.get('id') == item.id:
-            # Full update of the item
-            importedSyntheticData[i] = item.dict()
-            logging.info(f'Update successful for item {item}. PID: {os.getpid()}')
-            # write data to file
-            writeJSON(data, importedSyntheticData)
-            return {'success': 'data updated', 'newobject': newDict}
-        i += 1
-
-    # Object not in dictionnary, so add it
-    importedSyntheticData.append(newDict)
-    # write data to file
-    writeJSON(data, importedSyntheticData)
-    logging.info(f'PID: {os.getpid()}')
-    # Return status 201: created
-    response.status_code = status.HTTP_201_CREATED
-    return {'success': 'data added', 'newobject': newDict}
+    # record = [aDict for aDict in importedSyntheticData if item.id in aDict.values()]
+    index = [i for i, aDict in enumerate(importedSyntheticData) if item.id in aDict.values()]
+    if index:
+        # Object was found, we apply a full update on it
+        importedSyntheticData[index[0]] = item.dict()
+        logging.info(f'Update successful for item {item} at {platform.node()}')
+        # write data to file
+        writeJSON(data, importedSyntheticData)
+        return {'success': 'data updated', 'newobject': newDict}
+    else:
+        # Object was not found, so add it
+        importedSyntheticData.append(newDict)
+        # write data to file
+        writeJSON(data, importedSyntheticData)
+        logging.info(f'Added item {item} at {platform.node()}')
+        # Return status 201: created
+        response.status_code = status.HTTP_201_CREATED
+        return {'success': 'data added', 'newobject': newDict}
 
 @app.delete('/deleteItem/id/', status_code=200)
-async def deleteItem(identification: dict):
+async def deleteItem(item: dict):
     """
     Use DELETE APIs to delete a resource.
     URI: http://localhost:8000/deleteItem/
@@ -195,28 +195,25 @@ async def deleteItem(identification: dict):
     :return:
     """
     # DELETE an object, if it doesn't exist than throw an error
-    i = 0
-    for record in importedSyntheticData:
-        if record.get('id') == identification.get('id'):
-            # Removing element from the start (index = 0)
-            record = importedSyntheticData.pop(i)
-            # del importedSyntheticData[i]
-            logging.info(f'Delete successful for item {record}. PID: {os.getpid()}')
-            # write data to file
-            writeJSON(data, importedSyntheticData)
-            strSuccess = f'Delete of item "{identification["id"]}" successful PID {os.getpid()}'
-            return {'success': strSuccess, 'item': record}
-        i += 1
-    logging.info(f'PID: {os.getpid()}')
-    strError = f'Item {identification} was not found'
-    raise HTTPException(
-        status_code=404,
-        detail=strError,
-        headers={"X-Fake-REST-API": strError},
-    )
+    index = [i for i, aDict in enumerate(importedSyntheticData) if item.get("id") in aDict.values()]
+    if index:
+        record = importedSyntheticData.pop(index[0])
+        logging.info(f'Delete successful for item {record} at {platform.node()}')
+        # write data to file
+        writeJSON(data, importedSyntheticData)
+        strSuccess = f'Delete of item "{item.get("id")}" successful at {platform.node()}'
+        return {'success': strSuccess, 'item': record}
+    else:
+        logging.info(f'Object wasn\'t found on {platform.node()}')
+        strError = f'Item {item} was not found'
+        raise HTTPException(
+            status_code=404,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
 @app.patch('/patchItem/price/', status_code=200)
-async def patchItemPrice(identification: dict):
+async def patchItemPrice(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
@@ -229,28 +226,27 @@ async def patchItemPrice(identification: dict):
     :return:
     """
     # Partial update of an object, if it doesn't exist than throw an error
-    i = 0
-    for record in importedSyntheticData:
-        # if
-        if record.get('id') == identification.get('id'):
-            # Update element of an object from the start (index = 0)
-            importedSyntheticData[i]['price'] = identification.get('newprice')
-            strSuccess = f'Update of "price" successful for item {importedSyntheticData[i]}. PID: {os.getpid()}'
-            logging.info(strSuccess)
-            # write data to file
-            writeJSON(data, importedSyntheticData)
-            return {'success': strSuccess, 'item': record}
-        i += 1
-    logging.info(f'PID: {os.getpid()}')
-    strError = f'Item {identification} was not found'
-    raise HTTPException(
-        status_code=404,
-        detail=strError,
-        headers={"X-Fake-REST-API": strError},
-    )
+    index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
+    if index:
+        # Update element of an object from the start (index = 0)
+        importedSyntheticData[index[0]]['price'] = item.get('newprice')
+        strSuccess = f'Update of "price" successful for item {importedSyntheticData[index[0]]}.'
+        strSuccess += f'Hostname: {platform.node()}'
+        logging.info(strSuccess)
+        # write data to file
+        writeJSON(data, importedSyntheticData)
+        return {'success': strSuccess, 'item': importedSyntheticData[index[0]]}
+    else:
+        logging.info(f'Object wasn\'t found on {platform.node()}')
+        strError = f'Item {item} was not found'
+        raise HTTPException(
+            status_code=404,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
 @app.patch('/patchItem/quantity/', status_code=200)
-async def patchItemQuantity(identification: dict):
+async def patchItemQuantity(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
@@ -263,24 +259,25 @@ async def patchItemQuantity(identification: dict):
     :return:
     """
     # Partial update of an object, if it doesn't exist than throw an error
-    i = 0
-    for record in importedSyntheticData:
-        if record.get('id') == identification.get('id'):
-            # Update element of an object from the start (index = 0)
-            importedSyntheticData[i]['quantity'] = identification.get('newquantity')
-            strSuccess = f'Update of "quantity" successful for item {importedSyntheticData[i]}. PID: {os.getpid()}'
-            logging.info(strSuccess)
-            # write data to file
-            writeJSON(data, importedSyntheticData)
-            return {'success': strSuccess, 'item': record}
-        i += 1
-    logging.info(f'PID: {os.getpid()}')
-    strError = f'Item {identification} was not found'
-    raise HTTPException(
-        status_code=404,
-        detail=strError,
-        headers={"X-Fake-REST-API": strError},
-    )
+    # Partial update of an object, if it doesn't exist than throw an error
+    index = [i for i, aDict in enumerate(importedSyntheticData) if aDict.get("id") == item.get('id')]
+    if index:
+        # Update element of an object from the start (index = 0)
+        importedSyntheticData[index[0]]['quantity'] = item.get('newquantity')
+        strSuccess = f'Update of "quantity" successful for item {importedSyntheticData[index[0]]}.'
+        strSuccess += f'Hostname: {platform.node()}'
+        logging.info(strSuccess)
+        # write data to file
+        writeJSON(data, importedSyntheticData)
+        return {'success': strSuccess, 'item': importedSyntheticData[index[0]]}
+    else:
+        logging.info(f'Object wasn\'t found on {platform.node()}')
+        strError = f'Item {item} was not found'
+        raise HTTPException(
+            status_code=404,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
 def writeJSON(filename, myList):
     """
@@ -326,7 +323,7 @@ if __name__ == "__main__":
     # logger config
     logger = logging.getLogger()
     logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s: %(levelname)s %(funcName)s\t%(message)s',
+                        format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
     # Read the data file (fake database)
     if not readJSON(data):
@@ -334,5 +331,6 @@ if __name__ == "__main__":
         logging.info(f'Empty file {data} created')
     # prints the Python version
     logging.info(f'Python version: {platform.python_version()}')
+    logging.info(f'Hostname: {platform.node()}')
     # Start the server
     uvicorn.run(app, host="0.0.0.0", port=8000)
