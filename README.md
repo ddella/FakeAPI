@@ -109,6 +109,8 @@ If the object is not found, it returns HTTP status code 404:
 
 <!-- POST Example -->
 ## Example with POST method
+The `POST` method is used to add a new object. If the new object already exists, it will return an error:
+
 Use this command to add a new object:
 ```shell
 curl -X POST -H "Content-type: application/json" \
@@ -142,7 +144,7 @@ If the object was not found, it returns HTTP status code 409:
 
 <!-- PATCH Example -->
 ## Example with PATCH method
-The `PATCH` is used for partial update of an existing object:
+The `PATCH` method is used for partial update of an existing object:
 
 ```shell
 curl -X PATCH -H "Content-type: application/json" \
