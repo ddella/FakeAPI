@@ -57,39 +57,51 @@ data = 'data.json'
 # Swagger UI to be served at /docs and disable ReDoc:
 app = FastAPI(docs_url="/docs", redoc_url=None)
 
-@app.get("/", status_code=200)
-async def root():
+@app.api_route("/", methods=['GET', 'HEAD'], status_code=status.HTTP_200_OK)
+async def root(response: Response, request: Request):
     """
-    Example with curl:
+    This is the root of the Fake REST API.
+    Example with curl (add '-I' for HEAD method):
         curl -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -i -L "http://localhost:8000/"
-    :return:
+    :return: A message and the hostname of the server
     """
+    logging.debug(f'request.method={request.method} - {type(request.method)}')
+    headers = {"uri": "FakeREST API root"}
+    # response.status_code = status.HTTP_204_NO_CONTENT
+    response.headers.update(headers)
     return {"message": "Root of Fake REST API", "hostname": platform.node()}
 
-@app.get("/healthcheck", status_code=200)
-async def healthcheck():
+@app.api_route("/healthcheck", methods=['GET', 'HEAD'])
+async def healthcheck(response: Response, request: Request):
     """
+    Returns 200 for GET and 204 for HEAD. You could add more code for specific test
+    As an example, you could test a database connectivity
     Return health status of the API
-    Example with curl:
+    Example with curl (add '-I' for HEAD method):
         curl -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -i -L "http://localhost:8000/healthcheck"
-    :return: 200
+    :return: HTTP_200_OK or HTTP_204_NO_CONTENT
     """
-    # Returns 200, but you could add more code for specific test
-    # As an exxample, you could test a database connectivity
-    content = {"Health": "OK", "PID": os.getpid(), "hostname": platform.node()}
-    headers = {"X-Fake-API": "/healthcheck", "Content-Language": "en-US"}
-    return JSONResponse(content=content, headers=headers)
+    if request.method == 'GET':
+        content = {"Health": "OK", "PID": os.getpid(), "hostname": platform.node()}
+        headers = {"X-Fake-API": "/healthcheck", "X-Method": "Method was GET"}
+        response.status_code = status.HTTP_200_OK
+        return JSONResponse(content=content, headers=headers)
+    if request.method == 'HEAD':
+        headers = {"X-Fake-API": "/healthcheck", "X-Method": "Method was HEAD"}
+        response.status_code = status.HTTP_204_NO_CONTENT
+        response.headers.update(headers)
+        return
 
-@app.get("/errorCode/{code}")
+@app.api_route("/errorCode/{code}", methods=['GET', 'HEAD'])
 async def errorCode(code: int):
     """
     Return the error code in the HTTP header
     URI: http://localhost/errorCode/{code}
-    Example with curl:
+    Example with curl (add '-I' for HEAD method):
         curl -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -i -L "http://localhost:8000/errorCode/404"
@@ -103,11 +115,14 @@ async def errorCode(code: int):
         headers={"X-Fake-REST-API": strError},
     )
 
-@app.get("/id/{identification}", status_code=200)
+# @app.head("/id/{identification}", status_code=200)
+# @app.get("/id/{identification}", status_code=200)
+@app.api_route("/id/{identification}", methods=['GET', 'HEAD'], status_code=status.HTTP_200_OK)
 async def getItem(identification: str):
     """
     Query the database for a specific object
     URI: http://localhost/id/{identification}
+    GET method (add '-I' for HEAD method):
     Example with curl:
       curl -H "Content-type: application/json" \
       -H "Accept: application/json" \
@@ -127,7 +142,7 @@ async def getItem(identification: str):
             headers={"X-Fake-REST-API": strError},
         )
 
-@app.post('/addItem/', status_code=201)
+@app.post('/addItem/', status_code=status.HTTP_201_CREATED)
 async def addItem(item: Item):
     """
     Use POST APIs to create new object, if the object exists it throws an error
@@ -159,7 +174,7 @@ async def addItem(item: Item):
         logging.info(f'Object {item} added at {platform.node()}')
         return {'success': 'data added', 'newobject': newDict}
 
-@app.put('/updateItem/', status_code=200)
+@app.put('/updateItem/', status_code=status.HTTP_200_OK)
 async def update_item(item: Item, response: Response):
     """
     Use PUT APIs to make a full update on a resource. If the resource does not exist,
@@ -194,7 +209,7 @@ async def update_item(item: Item, response: Response):
         response.status_code = status.HTTP_201_CREATED
         return {'success': 'data added', 'newobject': newDict}
 
-@app.delete('/deleteItem/id/', status_code=200)
+@app.delete('/deleteItem/id/', status_code=status.HTTP_200_OK)
 async def deleteItem(item: dict):
     """
     Use DELETE APIs to delete a resource.
@@ -224,7 +239,7 @@ async def deleteItem(item: dict):
             headers={"X-Fake-REST-API": strError},
         )
 
-@app.patch('/patchItem/{patchURL}/', status_code=200)
+@app.patch('/patchItem/{patchURL}/', status_code=status.HTTP_200_OK)
 async def patchItem(patchURL: PatchURL, item: dict):
     """
     This is the main entry point for URI: /patchItem/{patchURL}
@@ -251,7 +266,7 @@ async def patchItem(patchURL: PatchURL, item: dict):
         val = patchItemDescription(item)
         return val
 
-@app.trace("/{full_path:path}", status_code=200)
+@app.trace("/{full_path:path}", status_code=status.HTTP_200_OK)
 async def trace(request: Request, full_path: str):
     """
     The TRACE method is for diagnosis purposes. It creates a loop-back test with the same request header that
@@ -268,6 +283,22 @@ async def trace(request: Request, full_path: str):
     if full_path:
         content.update({"path-error": full_path})
     return JSONResponse(content=content, headers=headers)
+
+@app.options("/{full_path:path}", status_code=status.HTTP_204_NO_CONTENT)
+async def options(response: Response):
+    """
+    The OPTIONS method is designed to communicate to the client which of the methods
+    are available to them on a given item or collection.
+    Example with curl:
+        curl -X OPTIONS -H "Content-type: application/json" \
+        -H "Accept: application/json" \
+        -i -L "http://localhost:8000/"
+    :return: The header with the methods supported by the server
+    """
+    headers = {"Allow": "OPTIONS, GET, POST, PUT, DELETE, TRACE, PATCH"}
+    response.status_code = status.HTTP_204_NO_CONTENT
+    response.headers.update(headers)
+    return
 
 def patchItemPrice(item: dict):
     """
