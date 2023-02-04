@@ -1,0 +1,25 @@
+# filename: fakeapi.yml
+# docker compose -f fakeapi.yml --project-name fakeapi up -d
+networks:
+   backend:
+      name: backend
+
+services:
+  fakeapi10:
+    image: fakeapi
+    volumes:
+      - type: bind
+        source: $PWD
+        target: /usr/src/data
+    ports:
+      - "9443:9443"
+    restart: unless-stopped
+    environment:
+      - HOST=172.31.11.10
+      - PORT=9443
+    hostname: fakeapi10
+    container_name: fakeapi10
+    domainname: example.com
+    networks:
+      backend:
+        ipv4_address: 172.31.11.10

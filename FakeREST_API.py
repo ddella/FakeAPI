@@ -27,7 +27,7 @@ REST API method
 https://restfulapi.net/http-methods/
 """
 from fastapi import FastAPI, HTTPException, Response, status, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from pydantic import BaseModel
 import logging
 import json
@@ -57,6 +57,22 @@ data = 'data.json'
 # Swagger UI to be served at /docs and disable ReDoc:
 app = FastAPI(docs_url="/docs", redoc_url=None)
 
+@app.api_route("/api/warehouse/inventory", methods=['GET', 'HEAD'], status_code=status.HTTP_200_OK)
+async def fullInventory(request: Request):
+    """
+    This is a test for Nginx API gateway with Fake REST API.
+    Example with curl (add '-I' for HEAD method):
+        curl -H "Content-type: application/json" \
+        -H "apikey: 7B5zIqmRGXmrJTFmKa99vcit" -H "Accept: application/json" \
+        --insecure -i -L "https://127.0.0.1:8444/api/warehouse/inventory"
+    :return: A message and the hostname of the server
+    """
+    logging.debug(f'request.method={request.method} - {type(request.method)}')
+    # headers = {"uri": "FakeREST API root"}
+    # response.status_code = status.HTTP_204_NO_CONTENT
+    # response.headers.update(headers)
+    return {"message": "'/api/warehouse/inventory' of Fake REST API", "hostname": platform.node()}
+
 @app.api_route("/", methods=['GET', 'HEAD'], status_code=status.HTTP_200_OK)
 async def root(response: Response, request: Request):
     """
@@ -64,7 +80,7 @@ async def root(response: Response, request: Request):
     Example with curl (add '-I' for HEAD method):
         curl -H "Content-type: application/json" \
         -H "Accept: application/json" \
-        -i -L "http://localhost:8000/"
+        -i -L "https://localhost:8443/"
     :return: A message and the hostname of the server
     """
     logging.debug(f'request.method={request.method} - {type(request.method)}')
@@ -73,7 +89,20 @@ async def root(response: Response, request: Request):
     response.headers.update(headers)
     return {"message": "Root of Fake REST API", "hostname": platform.node()}
 
-@app.api_route("/healthcheck", methods=['GET', 'HEAD'])
+@app.api_route('/api/hello/{number}/{message}', methods=['GET', 'HEAD'])
+async def hello_message(number: int, message: str):
+    """
+    Returns the message received in the URL
+    Example with curl (add '-I' for HEAD method):
+        curl -H "Content-type: application/json" \
+        -H "Accept: application/json" \
+        -i -L "https://localhost:9443/api/hello/123/Salut%20Daniel
+    :return: HTTP_200_OK
+    """
+    html_content = f'<h1>Welcome {message} with ID {number}!</h1>'
+    return HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
+
+@app.api_route("/api/healthcheck", methods=['GET', 'HEAD'])
 async def healthcheck(response: Response, request: Request):
     """
     Returns 200 for GET and 204 for HEAD. You could add more code for specific test
@@ -82,16 +111,16 @@ async def healthcheck(response: Response, request: Request):
     Example with curl (add '-I' for HEAD method):
         curl -H "Content-type: application/json" \
         -H "Accept: application/json" \
-        -i -L "http://localhost:8000/healthcheck"
+        -i -L "https://localhost:9443/api/healthcheck"
     :return: HTTP_200_OK or HTTP_204_NO_CONTENT
     """
     if request.method == 'GET':
         content = {"Health": "OK", "PID": os.getpid(), "hostname": platform.node()}
-        headers = {"X-Fake-API": "/healthcheck", "X-Method": "Method was GET"}
+        headers = {"X-Fake-API": "/api/healthcheck", "X-Method": "Method was GET"}
         response.status_code = status.HTTP_200_OK
         return JSONResponse(content=content, headers=headers)
     if request.method == 'HEAD':
-        headers = {"X-Fake-API": "/healthcheck", "X-Method": "Method was HEAD"}
+        headers = {"X-Fake-API": "/api/healthcheck", "X-Method": "Method was HEAD"}
         response.status_code = status.HTTP_204_NO_CONTENT
         response.headers.update(headers)
         return
@@ -104,7 +133,7 @@ async def errorCode(code: int):
     Example with curl (add '-I' for HEAD method):
         curl -H "Content-type: application/json" \
         -H "Accept: application/json" \
-        -i -L "http://localhost:8000/errorCode/404"
+        -i -L "https://localhost:8443/errorCode/404"
     :return:
     """
     logging.info(f'Code = {code} from {platform.node()}')
@@ -126,7 +155,7 @@ async def getItem(identification: str):
     Example with curl:
       curl -H "Content-type: application/json" \
       -H "Accept: application/json" \
-      -i -L "http://localhost:8000/id/562641783"
+      -i -L "https://localhost:8443/id/562641783"
     :return: {"id":"xx","description":"A description","price":15.67,"quantity":32}
     """
     record = [d for d in importedSyntheticData if d.get('id') == identification]
@@ -151,7 +180,7 @@ async def addItem(item: Item):
         curl -X POST -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
-        -i -L "http://localhost:8000/addItem/"
+        -i -L "https://localhost:8443/addItem/"
     :param item: The new object
     :return: status code and new object, if creation successful
     """
@@ -179,12 +208,12 @@ async def update_item(item: Item, response: Response):
     """
     Use PUT APIs to make a full update on a resource. If the resource does not exist,
     then API may decide to create a new resource or not. In this examaple we do create the resource.
-    URI: http://localhost:8000/updateItem/
+    URI: https://localhost:8443/updateItem/
     Example with curl:
         curl -X PUT -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
-        -i -L "http://localhost:8000/updateItem/"
+        -i -L "https://localhost:8443/updateItem/"
     :param response: 200 for updated item or 201 for creating item
     :param item: A dictionnary with the new item
     :return:
@@ -213,12 +242,12 @@ async def update_item(item: Item, response: Response):
 async def deleteItem(item: dict):
     """
     Use DELETE APIs to delete a resource.
-    URI: http://localhost:8000/deleteItem/
+    URI: https://localhost:8443/deleteItem/
     Example with curl:
         curl -X DELETE -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -d '{"id":"123456789"}' \
-        -i -L "http://localhost:8000/deleteItem/id/"
+        -i -L "https://localhost:8443/deleteItem/id/"
     :return:
     """
     # DELETE an object, if it doesn't exist then throw an error
@@ -274,7 +303,7 @@ async def trace(request: Request, full_path: str):
     Example with curl:
         curl -X TRACE -H "Content-type: application/json" \
         -H "Accept: application/json" -H "trace: trace-method-test"\
-        -i -L "http://localhost:8000/"
+        -i -L "https://localhost:8443/"
     :return: The header sent by the client
     """
     clientHeader = dict(request.headers.items())
@@ -292,7 +321,7 @@ async def options(response: Response):
     Example with curl:
         curl -X OPTIONS -H "Content-type: application/json" \
         -H "Accept: application/json" \
-        -i -L "http://localhost:8000/"
+        -i -L "https://localhost:8443/"
     :return: The header with the methods supported by the server
     """
     headers = {"Allow": "OPTIONS, GET, POST, PUT, DELETE, TRACE, PATCH"}
@@ -304,12 +333,12 @@ def patchItemPrice(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
-    URI: http://localhost:8000/patchItem/price/
+    URI: https://localhost:8443/patchItem/price/
     Example with curl:
         curl -X PATCH -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -d '{"id":"123456789", "newprice": 666.66}' \
-        -i -L "http://localhost:8000/patchItem/price/"
+        -i -L "https://localhost:8443/patchItem/price/"
     :return:
     """
     # Partial update of an object, if it doesn't exist then throw an error
@@ -336,12 +365,12 @@ def patchItemQuantity(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
-    URI: http://localhost:8000/patchItem/quantity/
+    URI: https://localhost:8443/patchItem/quantity/
     Example with curl:
         curl -X PATCH -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -d '{"id":"123456789", "newquantity": 666}' \
-        -i -L "http://localhost:8000/patchItem/quantity/"
+        -i -L "https://localhost:8443/patchItem/quantity/"
     :return:
     """
     # Partial update of an object, if it doesn't exist then throw an error
@@ -368,12 +397,12 @@ def patchItemDescription(item: dict):
     """
     Use PATCH APIs to make a partial update on a ressource.
     If ressource doesn't exist, throw an error.
-    URI: http://localhost:8000/patchItem/description/
+    URI: https://localhost:8443/patchItem/description/
     Example with curl:
         curl -X PATCH -H "Content-type: application/json" \
         -H "Accept: application/json" \
         -d '{"id":"123456789", "newdescription": "This is a new description"}' \
-        -i -L "http://localhost:8000/patchItem/description/"
+        -i -L "https://localhost:8443/patchItem/description/"
     :return:
     """
     # Partial update of an object, if it doesn't exist then throw an error
@@ -430,7 +459,7 @@ def readJSON(filename):
         importedSyntheticData = data_loaded
         return True
     except IOError as e:
-        logging.error(f'IOErro: {e}')
+        logging.warning(f'IOErro: {e}')
         # Empty list of dictionnary
         importedSyntheticData = []
         return False
@@ -449,5 +478,20 @@ if __name__ == "__main__":
     # prints the Python version
     logging.info(f'Python version: {platform.python_version()}')
     logging.info(f'Hostname: {platform.node()}')
+
+    # Returns '0.0.0.0' if the key doesn't exist
+    HOST = os.environ.get("HOST", "0.0.0.0")
+    logging.info(f'HOST={HOST}')
+    # Returns TCP/9443 if the key doesn't exist
+    PORT = int(os.environ.get("PORT", 9443))
+    logging.info(f'PORT={PORT}')
     # Start the server
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=HOST, port=PORT,
+                ssl_keyfile="server-key.pem",
+                ssl_certfile="server-crt.pem",
+                ssl_ca_certs="ca-chain.pem",
+                # ssl_ciphers="TLSv1.2",
+                # log_level="info")
+                # log requests from client
+                access_log=True,
+                log_level="info")

@@ -3,9 +3,9 @@
 
 # What is FakeAPI
 
-FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no testing to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, like [MuleSoft](https://www.mulesoft.com/).
+FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no testing, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) and [MuleSoft](https://www.mulesoft.com/), to name a few.
 
->Implements only `JSON` objects. Sorry no `XML` 😉
+>FaekAPI implements only `JSON` objects. Sorry no `XML` 😉
 
 The script requires the following Python modules:
 * pydantic
@@ -26,6 +26,7 @@ REST API methods implemented in FakeAPI:
 ## Build the image with the Dockerfile in your Python app project
 This is my `Dockerfile`:
 
+    # Build: docker build -t fakeapi .
     FROM python:alpine
 
     RUN ["mkdir", "-p", "/usr/src/data"]
@@ -35,8 +36,9 @@ This is my `Dockerfile`:
     RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
 
     COPY ["./FakeREST_API.py", "./"]
-
-    EXPOSE 8000
+    COPY ["./ca-chain.pem", "./"]
+    COPY ["./server-key.pem", "./"]
+    COPY ["./server-crt.pem", "./"]
 
     CMD [ "python", "./FakeREST_API.py" ]
 
@@ -48,21 +50,40 @@ docker build -t fakeapi .
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
-You can run the container with the database inside it. As soon as you exit the container the data will be lost. You can map (`bind`) a local directory of the host inside the container. This way you keep the data after the container exist.
+You can run the container with the database inside it. As soon as you exit the container, the data will be lost. You can map (`bind`) a local directory of the host inside the container. This way you keep the data after the container exit.
 
 >Use an appropriate `hostname` if you start multiple containers. This is the only unique ID I found, as the process ID is alway `1` when the script runs inside the container. The logs will print the `hostname` so you know which container did what. Remember I made this script to test API Gateways.
 
 ## Run the project with the data file inside the container.
 The data will be lost when the container exits.
 ```sh
-docker run -it --rm -p 8000:8000 --name fakeapi --hostname fakeapi1 fakeapi
+docker run -it --rm -p 9443:9443 --name fakeapi \
+--network=backend \
+--ip 172.31.11.10 \
+--env HOST='172.31.11.10' \
+--env PORT=9443 \
+--hostname fakeapi10 fakeapi
+```
+>If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
+
+## Custom network (optional)
+FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I encourage you to run your containers in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
+
+```sh
+docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.11.128/25 --gateway=172.31.11.1 backend
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Run the project with the data file on the Docker host.
 Mount the container `/usr/src/data` directory on the current directory of the host. Data will be on the Docker host when the container exits. The container also run in interactive mode because of the `-it` switch. This way you can look at the logs.
 ```sh
-docker run -it --rm -v $PWD:/usr/src/data -p 8000:8000 --name fakeapi --hostname fakeapi1 fakeapi
+docker run -it --rm -p 9443:9443 --name fakeapi \
+--network=backend \
+--ip 172.31.11.10 \
+--env HOST='172.31.11.10' \
+--env PORT=9443 \
+-v $PWD:/usr/src/data \
+--hostname fakeapi10 fakeapi
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -75,7 +96,7 @@ docker run -it --rm --hostname fakeapi1 -v $PWD:/usr/src/data fakeapi /bin/sh
 
 <!-- Docs -->
 ## Docs URLs
-You can check the the interactive documentations made available by swagger UI at `http://localhost:8000/docs`.
+You can check the the interactive documentations made available by swagger UI at `http://localhost:9443/docs`.
 
 ![Documentation](images/docs.jpg)
 
@@ -89,7 +110,7 @@ Use this command to query of an object by it's ID:
 ```shell
 curl -H "Content-type: application/json" \
     -H "Accept: application/json" \
-    -i -L "http://localhost:8000/id/562641783"
+    -i -L "http://localhost:9443/id/562641783"
 ```
 This will send a `GET` request to the server. If it finds the object, the server returns the object in `JSON` format like this:
 
@@ -122,7 +143,7 @@ Use this command to add a new object:
 curl -X POST -H "Content-type: application/json" \
     -H "Accept: application/json" \
     -d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
-    -i -L "http://localhost:8000/addItem/"
+    -i -L "http://localhost:9443/addItem/"
 ```
 
 This will send a `POST` request to the server. If it finds the object, the server returns an error. If it doesn't find the object, it adds it to the database:
@@ -156,7 +177,7 @@ The `PATCH` method is used for partial update of an existing object:
 curl -X PATCH -H "Content-type: application/json" \
     -H "Accept: application/json" \
     -d '{"id":"123456789", "newprice": 666.66}' \
-    -i -L "http://localhost:8000/patchItem/price/"
+    -i -L "http://localhost:9443/patchItem/price/"
 ```
 
 This will send a `PATCH` request to the server. If it finds the object, the server updates only the `price`. If it doesn't find the object, an error is returned:
@@ -189,7 +210,7 @@ The `TRACE` method is used for diagnosis purposes. It creates a loop-back test w
 ```shell
 curl -X TRACE -H "Content-type: application/json" \
     -H "Accept: application/json" -H "trace: trace-method-test"\
-    -i -L "http://localhost:8000/"
+    -i -L "http://localhost:9443/"
 ```
 
 This will send a `TRACE` request to the server and it will reply with the header of received from the client:
@@ -201,7 +222,7 @@ This will send a `TRACE` request to the server and it will reply with the header
     content-length: 184
     content-type: application/json
 
-    {"header":{"host":"localhost:8000","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"},"hostname":"localhost.local"}
+    {"header":{"host":"localhost:9443","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"},"hostname":"localhost.local"}
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

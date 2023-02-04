@@ -9,6 +9,9 @@ COPY ["requirements.txt", "./"]
 RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
 
 COPY ["./FakeREST_API.py", "./"]
+COPY ["./ca-chain.pem", "./"]
+COPY ["./server-key.pem", "./"]
+COPY ["./server-crt.pem", "./"]
 
 EXPOSE 8000
 
