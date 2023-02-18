@@ -57,12 +57,15 @@ You can run the container with the database inside it. As soon as you exit the c
 ## Run the project with the data file inside the container.
 The data will be lost when the container exits.
 ```sh
-docker run -it --rm -p 9443:9443 --name fakeapi \
+docker run -it --rm -p 9443:9443 --name server1 \
 --network=backend \
 --ip 172.31.11.10 \
---env HOST='172.31.11.10' \
+--env HOST='172.31.11.11' \
 --env PORT=9443 \
---hostname fakeapi10 fakeapi
+--env SERVER_CRT=/etc/ssl/private/server1-crt.pem \
+--env SERVER_KEY=/etc/ssl/private/server1-key.pem \
+--env DATA=/usr/src/data/data.json \
+--hostname server1 fakeapi
 ```
 >If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
 

@@ -5,14 +5,9 @@ FROM python:alpine
 RUN ["mkdir", "-p", "/usr/src/data"]
 WORKDIR /usr/src/app
 
-COPY ["requirements.txt", "./"]
+COPY ["./src/requirements.txt", "./"]
 RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
 
-COPY ["./FakeREST_API.py", "./"]
-COPY ["./ca-chain.pem", "./"]
-COPY ["./server-key.pem", "./"]
-COPY ["./server-crt.pem", "./"]
+COPY ["./src/*", "./"]
 
-EXPOSE 8000
-
-CMD [ "python", "./FakeREST_API.py" ]
+CMD [ "python", "./app.py" ]

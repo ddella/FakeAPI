@@ -471,6 +471,11 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
+
+    # Returns "server-key.pem" if the key doesn't exist
+    data = os.environ.get("DATA", "data.json")
+    logging.info(f'Database={data}')
+
     # Read the data file (fake database)
     if not readJSON(data):
         writeJSON(data, importedSyntheticData)
@@ -482,14 +487,24 @@ if __name__ == "__main__":
     # Returns '0.0.0.0' if the key doesn't exist
     HOST = os.environ.get("HOST", "0.0.0.0")
     logging.info(f'HOST={HOST}')
+
     # Returns TCP/9443 if the key doesn't exist
     PORT = int(os.environ.get("PORT", 9443))
     logging.info(f'PORT={PORT}')
+
+    # Returns "server-crt.pem" if the key doesn't exist
+    SERVER_CRT = os.environ.get("SERVER_CRT", "server-crt.pem")
+    logging.info(f'Server Certificate={SERVER_CRT}')
+
+    # Returns "server-key.pem" if the key doesn't exist
+    SERVER_KEY = os.environ.get("SERVER_KEY", "server-key.pem")
+    logging.info(f'Server Private Key={SERVER_KEY}')
+
     # Start the server
     uvicorn.run(app, host=HOST, port=PORT,
-                ssl_keyfile="server-key.pem",
-                ssl_certfile="server-crt.pem",
-                ssl_ca_certs="ca-chain.pem",
+                ssl_keyfile=SERVER_KEY,
+                ssl_certfile=SERVER_CRT,
+                # ssl_ca_certs="ca-chain.pem",
                 # ssl_ciphers="TLSv1.2",
                 # log_level="info")
                 # log requests from client

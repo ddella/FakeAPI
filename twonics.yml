@@ -1,0 +1,33 @@
+# filename: twonics.yml
+# Example of a container with 2 NICs
+# To start the container: docker compose -f twonics.yml --project-name twonics up -d
+#
+# Run: docker compose -f twonics.yml --project-name twonics up -d
+#   Omit the '-d' switch to run in interactive mode
+# Stop: docker stop twonics
+
+networks:
+   backend:
+      name: backend
+   frontend:
+      name: frontend
+
+services:
+  twonics:
+    image: sshd
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    environment:
+      - PORT=9443
+      - DATA=/usr/src/data/data.json
+      - SERVER_CRT=/etc/ssl/private/server1-crt.pem
+      - SERVER_KEY=/etc/ssl/private/server1-key.pem
+    container_name: twonics
+    hostname: twonics
+    domainname: backend.com
+    networks:
+      backend:
+        ipv4_address: 172.31.11.25
+      frontend:
+        ipv4_address: 172.31.10.25
