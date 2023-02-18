@@ -25,22 +25,21 @@ REST API methods implemented in FakeAPI:
 
 ## Build the image with the Dockerfile in your Python app project
 This is my `Dockerfile`:
+```Dockerfile
+# Build
+# docker build -t fakeapi .
+FROM python:alpine
 
-    # Build: docker build -t fakeapi .
-    FROM python:alpine
+RUN ["mkdir", "-p", "/usr/src/data"]
+WORKDIR /usr/src/app
 
-    RUN ["mkdir", "-p", "/usr/src/data"]
-    WORKDIR /usr/src/app
+COPY ["./src/requirements.txt", "./"]
+RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
 
-    COPY ["requirements.txt", "./"]
-    RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
+COPY ["./src/*", "./"]
 
-    COPY ["./FakeREST_API.py", "./"]
-    COPY ["./ca-chain.pem", "./"]
-    COPY ["./server-key.pem", "./"]
-    COPY ["./server-crt.pem", "./"]
-
-    CMD [ "python", "./FakeREST_API.py" ]
+CMD [ "python", "./app.py" ]
+```
 
 After the build, the imaage should be `~78Mb`.
 
