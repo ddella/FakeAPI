@@ -41,7 +41,7 @@ COPY ["./src/*", "./"]
 CMD [ "python", "./app.py" ]
 ```
 
-After the build, the imaage should be `~78Mb`.
+After the build, the image should be `~80Mb`.
 
 ```sh
 docker build -t fakeapi .
@@ -56,15 +56,10 @@ You can run the container with the database inside it. As soon as you exit the c
 ## Run the project with the data file inside the container.
 The data will be lost when the container exits.
 ```sh
-docker run -it --rm -p 9443:9443 --name server1 \
---network=backend \
---ip 172.31.11.10 \
---env HOST='172.31.11.11' \
---env PORT=9443 \
---env SERVER_CRT=/etc/ssl/private/server1-crt.pem \
---env SERVER_KEY=/etc/ssl/private/server1-key.pem \
---env DATA=/usr/src/data/data.json \
---hostname server1 fakeapi
+docker run -it --rm -v $PWD/src:/usr/src/data \
+-e FAKEAPI_ENV=/usr/src/data/.env \
+--name server1 --hostname server1 --network backend -p9443:9443 \
+fakeapi /bin/sh
 ```
 >If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
 
