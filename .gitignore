@@ -7,3 +7,5 @@ blank-README.md
 *.pptx
 *.docx
 *.xlsx
+build.sh
+
