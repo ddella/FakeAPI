@@ -14,23 +14,33 @@ Type of parameter(s) passed with the API:
     4. Content body parameter(s)
 """
 
-from fastapi import FastAPI, Request, status, HTTPException, Response
-from .definitions import *
+from fastapi import APIRouter, Request, status, HTTPException
+# from fastapi import Response
+from fastapi.responses import RedirectResponse
+from REST_API.FakeAPI.app.definitions import items, IDPrice
 
-app = FastAPI(openapi_tags=tags_metadata)
+router = APIRouter()
 
-@app.get("/", status_code=status.HTTP_308_PERMANENT_REDIRECT, tags=["root"])
-async def root(response: Response) -> None:
+@router.get("/", response_class=RedirectResponse, include_in_schema=False)
+async def docs():
     """
     This router redirects to the swagger page at location: /docs
-    :param response:
     :return:
     """
-    headers = {"Location": "/docs"}
-    response.headers.update(headers)
-    return
+    return RedirectResponse(url='/docs')
 
-@app.get("/api/items", tags=["get"])
+# @router.get("/", status_code=status.HTTP_308_PERMANENT_REDIRECT, tags=["root"])
+# async def root(response: Response) -> None:
+#     """
+#     This router redirects to the swagger page at location: /docs
+#     :param response:
+#     :return:
+#     """
+#     headers = {"Location": "/docs"}
+#     response.headers.update(headers)
+#     return
+
+@router.get("/api/items", tags=["get"])
 async def get_all_items(request: Request) -> dict:
     """
     Returns all the resources. No parameter needed.
@@ -41,7 +51,7 @@ async def get_all_items(request: Request) -> dict:
     """
     return {"message": "Root of Fake REST API", "method": request.method, "items": items}
 
-@app.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
+@router.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
 def path_parameter(item_id: int, price: float) -> dict:
     """
     Path parameters help scope the API call down to a single resource, which means you don’t have to build a body for
@@ -71,7 +81,7 @@ def path_parameter(item_id: int, price: float) -> dict:
             headers={"X-Fake-REST-API": strError},
         )
 
-@app.get("/api/item/0/price", tags=["query_parameter"])
+@router.get("/api/item/0/price", tags=["query_parameter"])
 def query_parameter(item_id: int, price: float) -> dict:
     """
     Query parameters are optional. In FastAPI, function parameters that aren’t declared as part of the path parameters
@@ -113,7 +123,7 @@ def query_parameter(item_id: int, price: float) -> dict:
         headers={"X-Fake-REST-API": strError},
     )
 
-@app.get("/api/item/1/price", status_code=status.HTTP_200_OK, tags=["content_parameter"])
+@router.get("/api/item/1/price", status_code=status.HTTP_200_OK, tags=["content_parameter"])
 async def content_parameter(itemPrice: IDPrice) -> dict:
     """
     In a request body, data sent by the client to your API in the body of the request. To declare one in FastAPI,
@@ -137,3 +147,23 @@ async def content_parameter(itemPrice: IDPrice) -> dict:
         detail=strError,
         headers={"X-Fake-REST-API": strError},
     )
+
+if __name__ == "__main__":
+    import uvicorn
+    import logging
+    import platform
+    from fastapi import FastAPI
+    from definitions import tags_metadata, HOSTNAME, PORT
+
+    # logger config
+    logger = logging.getLogger()
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    logging.info(f'Python version: {platform.python_version()}')
+    logging.info(f'Hostname: {platform.node()}')
+
+    app = FastAPI(openapi_tags=tags_metadata)
+    app.include_router(router)
+
+    uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")

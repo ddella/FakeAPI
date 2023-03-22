@@ -15,12 +15,12 @@ The difference between the PUT and PATCH APIs are that PUT is a full update as P
 If an existing resource is modified, either the 200 (OK) or 204 (No Content) response codes SHOULD be sent to indicate
 successful completion of the request.
 """
-from fastapi import FastAPI, HTTPException, status
-from .definitions import *
+from fastapi import APIRouter, HTTPException, status
+from REST_API.FakeAPI.app.definitions import IDPrice, items, IDQuantity
 
-app = FastAPI(openapi_tags=tags_metadata)
+router = APIRouter()
 
-@app.patch("/api/item/id/price", status_code=status.HTTP_200_OK, tags=["patch"])
+@router.patch("/api/item/id/price", status_code=status.HTTP_200_OK, tags=["patch"])
 def updatePrice(update_price: IDPrice) -> dict:
     """
     This API updated the price of an item given its ID.
@@ -51,7 +51,7 @@ def updatePrice(update_price: IDPrice) -> dict:
         headers={"X-Fake-REST-API": strError},
     )
 
-@app.patch("/api/item/id/quantity", status_code=status.HTTP_200_OK, tags=["patch"])
+@router.patch("/api/item/id/quantity", status_code=status.HTTP_200_OK, tags=["patch"])
 def updateQuantity(update_quantity: IDQuantity) -> dict:
     """
     This API updated the quantity of an item given its ID.
@@ -81,3 +81,24 @@ def updateQuantity(update_quantity: IDQuantity) -> dict:
         detail=strError,
         headers={"X-Fake-REST-API": strError},
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import logging
+    import platform
+    from definitions import tags_metadata, HOSTNAME, PORT
+    from fastapi import FastAPI
+
+    # logger config
+    logger = logging.getLogger()
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    logging.info(f'Python version: {platform.python_version()}')
+    logging.info(f'Hostname: {platform.node()}')
+
+    app = FastAPI(openapi_tags=tags_metadata)
+    app.include_router(router)
+
+    uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")

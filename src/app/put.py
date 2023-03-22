@@ -15,12 +15,12 @@ code 201 (Created) response.
 If an existing resource is modified, either the 200 (OK) or 204 (No Content) response codes SHOULD be sent to indicate
 successful completion of the request.
 """
-from fastapi import FastAPI, HTTPException, status
-from .definitions import *
+from fastapi import APIRouter, HTTPException, status
+from REST_API.FakeAPI.app.definitions import Item, items
 
-app = FastAPI(openapi_tags=tags_metadata)
+router = APIRouter()
 
-@app.put("/api/item/id", status_code=status.HTTP_200_OK, tags=["put"])
+@router.put("/api/item/id", status_code=status.HTTP_200_OK, tags=["put"])
 def update_item(updated_item: Item) -> dict:
     """
     A request body is data sent by the client to your API in the message body. To declare one in FastAPI,

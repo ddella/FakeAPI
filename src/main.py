@@ -2,6 +2,17 @@
 import uvicorn
 import logging
 import platform
+from fastapi import FastAPI
+from app.definitions import tags_metadata, HOSTNAME, PORT
+
+import app.delete as delete     # DELETE method
+import app.get as get           # GET method
+import app.head as head         # HEAD method
+import app.options as options   # OPTIONS method
+import app.patch as patch       # PATCH method
+import app.post as post         # POST method
+import app.put as put           # PUT method
+import app.trace as trace       # TRACE method
 
 if __name__ == "__main__":
     # logger config
@@ -10,31 +21,16 @@ if __name__ == "__main__":
                         format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
     logging.info(f'Python version: {platform.python_version()}')
-    logging.info(f'Hostname: {platform.node()}')
-    
-    HOSTNAME = "0.0.0.0"
-    PORT = 8000
+    logging.info(f'Hostname: {platform.node()} listening on interface {HOSTNAME}:{PORT}')
 
-    # Method GET
-    uvicorn.run("app.get:app", host=HOSTNAME, port=PORT, log_level="info")
+    app = FastAPI(openapi_tags=tags_metadata)
+    app.include_router(delete.router)
+    app.include_router(get.router)
+    app.include_router(head.router)
+    app.include_router(options.router)
+    app.include_router(patch.router)
+    app.include_router(post.router)
+    app.include_router(put.router)
+    app.include_router(trace.router)
 
-    # Method POST
-    # uvicorn.run("app.post:app", host=HOSTNAME, port=PORT, log_level="info")
-
-    # Method PUT
-    # uvicorn.run("app.put:app", host=HOSTNAME, port=PORT, log_level="info")
-
-    # Method PATCH
-    # uvicorn.run("app.patch:app", host=HOSTNAME, port=PORT, log_level="info")
-
-    # Method HEAD
-    # uvicorn.run("app.head:app", host=HOSTNAME, port=PORT, log_level="info")
-
-    # Method TRACE
-    # uvicorn.run("app.trace:app", host=HOSTNAME, port=PORT, log_level="info")
-
-    # Method OPTIONS
-    # uvicorn.run("app.options:app", host=HOSTNAME, port=PORT, log_level="info")
-
-    # Method DELETE
-    # uvicorn.run("app.delete:app", host=HOSTNAME, port=PORT, log_level="info")
+    uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")

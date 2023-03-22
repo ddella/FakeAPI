@@ -2,6 +2,9 @@
 from enum import Enum
 from pydantic import BaseModel
 
+HOSTNAME = "0.0.0.0"
+PORT = 8000
+
 tags_metadata = [
     {
         "name": "root",
@@ -11,18 +14,6 @@ tags_metadata = [
         "name": "get",
         "description": "Example of the **GET** method REST API.",
     },
-    # {
-    #     "name": "path_parameter",
-    #     "description": "Example of the **GET** method REST API with **path parameter(s)**.",
-    # },
-    # {
-    #     "name": "query_parameter",
-    #     "description": "Example of the **GET** method REST API with **query parameter(s)**.",
-    # },
-    # {
-    #     "name": "content_parameter",
-    #     "description": "Example of the **GET** method REST API with **content body parameter(s)**.",
-    # },
     {
         "name": "post",
         "description": "Example of the **POST** method REST API.",
@@ -40,10 +31,6 @@ tags_metadata = [
         "description": "Example of the **HEAD** method REST API.",
     },
     {
-        "name": "request_body",
-        "description": "Example of **query_parameter** REST API.",
-    },
-    {
         "name": "trace",
         "description": "Example of the **TRACE** method REST API.",
     },
@@ -55,14 +42,14 @@ tags_metadata = [
         "name": "delete",
         "description": "Example of the **DELETE** method REST API.",
     },
-    {
-        "name": "items",
-        "description": "Manage items. So _fancy_ they have their own docs.",
-        "externalDocs": {
-            "description": "Items external docs",
-            "url": "https://fastapi.tiangolo.com/",
-        },
-    },
+    # {
+    #     "name": "items",
+    #     "description": "Manage items. So _fancy_ they have their own docs.",
+    #     "externalDocs": {
+    #         "description": "Items external docs",
+    #         "url": "https://fastapi.tiangolo.com/",
+    #     },
+    # },
 ]
 
 class Category(Enum):

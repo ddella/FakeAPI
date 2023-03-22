@@ -9,12 +9,12 @@ Ideally, if a resource has been created on the origin server, the response SHOUL
 Many times, the action performed by the POST method might not result in a resource that can be identified by a URI.
 In this case, either HTTP response code 200 (OK) or 204 (No Content) is the appropriate response status.
 """
-from fastapi import FastAPI, HTTPException, status
-from .definitions import *
+from fastapi import APIRouter, HTTPException, status
+from REST_API.FakeAPI.app.definitions import Item, items
 
-app = FastAPI(openapi_tags=tags_metadata)
+router = APIRouter()
 
-@app.post("/api/item", status_code=status.HTTP_201_CREATED, tags=["post"])
+@router.post("/api/item", status_code=status.HTTP_201_CREATED, tags=["post"])
 def add_item(item: Item) -> dict:
     """
     A request body is data sent by the client to your API in the message body. To declare one in FastAPI,
@@ -42,3 +42,24 @@ def add_item(item: Item) -> dict:
         )
     items.append(item)
     return dict(item)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import logging
+    import platform
+    from definitions import tags_metadata, HOSTNAME, PORT
+    from fastapi import FastAPI
+
+    # logger config
+    logger = logging.getLogger()
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    logging.info(f'Python version: {platform.python_version()}')
+    logging.info(f'Hostname: {platform.node()}')
+
+    app = FastAPI(openapi_tags=tags_metadata)
+    app.include_router(router)
+
+    uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")
