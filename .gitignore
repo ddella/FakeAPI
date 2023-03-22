@@ -8,4 +8,5 @@ blank-README.md
 *.docx
 *.xlsx
 build.sh
+__pycache__
 
