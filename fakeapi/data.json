@@ -1,0 +1,44 @@
+[
+   {
+      "id": 100,
+      "description": "This is a description",
+      "price": 99.99,
+      "quantity": 100,
+      "category": "clothes"
+   },
+   {
+      "id": 101,
+      "description": "Jeans",
+      "price": 39.99,
+      "quantity": 100,
+      "category": "clothes"
+   },
+   {
+      "id": 102,
+      "description": "Apple",
+      "price": 0.5,
+      "quantity": 150,
+      "category": "grocery"
+   },
+   {
+      "id": 103,
+      "description": "Radio AM/FM",
+      "price": 25.49,
+      "quantity": 5,
+      "category": "consumables"
+   },
+   {
+      "id": 1004,
+      "description": "This is a description",
+      "price": 99.99,
+      "quantity": 100,
+      "category": "clothes"
+   },
+   {
+      "id": 104,
+      "description": "This is a description",
+      "price": 99.99,
+      "quantity": 100,
+      "category": "clothes"
+   }
+]

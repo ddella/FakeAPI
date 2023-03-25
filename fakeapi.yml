@@ -1,5 +1,6 @@
-# filename: fakeapi.yml
-# docker compose -f fakeapi.yml --project-name fakeapi up -d
+# fakeapi.yml
+# Start the container: docker compose -f fakeapi.yml --project-name fakeapi up -d
+# Stop the container: docker container rm -f server1
 networks:
    backend:
       name: backend
@@ -9,14 +10,14 @@ services:
     image: fakeapi
     volumes:
       - type: bind
-        source: $PWD/src
+        source: $PWD
         target: /usr/src/data
-        read_only: true
+        # read_only: true
     ports:
-      - "9443:9443"
+      - "8000:8000"
     restart: unless-stopped
     environment:
-      - FAKEAPI_ENV=/usr/src/data/.env
+      - DATABASE=/usr/src/data/data.json
     container_name: server1
     hostname: server1
     domainname: backend.com

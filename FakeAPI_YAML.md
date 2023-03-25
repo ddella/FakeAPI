@@ -1,18 +1,26 @@
 # Docker Compose for the FakeAPI container
 
-### YAML file to start the FakeAPI Server
+## Docker Compose commands
 
 This is the `yaml` file to run the FakeAPI Server detached.
 
-To start the FakeAPI server, just type the following command, with the file `fakeapi.yml`.
+1. To start the FakeAPI server, just type the following command:
 
-```command
+```sh
 docker compose -f fakeapi.yml --project-name fakeapi up -d
 ```
+2. To stop the FakeAPI server, just type the following command:
+
+```sh
+docker container rm -f fakeapi10
+```
+
+## YAML file to start the FakeAPI Server
 
 ```yaml
-# filename: fakeapi.yml
-# docker compose -f fakeapi.yml --project-name fakeapi up -d
+# fakeapi.yml
+# Start the container: docker compose -f fakeapi.yml --project-name fakeapi up -d
+# Stop the container: docker container rm -f sefakeapi10rver1
 networks:
    backend:
       name: backend
@@ -25,11 +33,11 @@ services:
         source: $PWD
         target: /usr/src/data
     ports:
-      - "9443:9443"
+      - "8000:8000"
     restart: unless-stopped
     environment:
       - HOST=172.31.11.10
-      - PORT=9443
+      - PORT=8000
     hostname: fakeapi10
     container_name: fakeapi10
     domainname: example.com

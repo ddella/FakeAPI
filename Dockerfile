@@ -1,17 +1,23 @@
-# Build
-# docker build -t fakeapi .
+# Use the following command to build the Docker image:
+#   docker build -t fakeapi .
+# (Optional) If you suspect somethings wrong, you can start the container with the command:
+#   docker run -it --rm --name fakeapi fakeapi /bin/sh
+#
 FROM python:alpine
 
-# set the working directory
+# create the database directory
 RUN ["mkdir", "-p", "/usr/src/data"]
+
+# set the working directory for the app
+RUN ["mkdir", "-p", "/usr/src/app"]
 WORKDIR /usr/src/app
 
 # install dependencies
-COPY ["./src/requirements.txt", "./"]
-RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
+RUN ["pip", "install", "fastapi", "uvicorn", "pydantic"]
 
 # copy the scripts to the folder
-COPY ["./src/*", "./"]
+COPY ["./fakeapi/main.py", "./"]
+COPY ["./fakeapi/app/*.py", "./app/"]
 
 # start the server
-CMD [ "python", "./app.py" ]
+CMD [ "python", "./main.py" ]

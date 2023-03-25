@@ -16,7 +16,8 @@ If an existing resource is modified, either the 200 (OK) or 204 (No Content) res
 successful completion of the request.
 """
 from fastapi import APIRouter, HTTPException, status
-from REST_API.FakeAPI.app.definitions import Item, items
+from app.definitions import Item
+import app.database as db
 
 router = APIRouter()
 
@@ -38,10 +39,12 @@ def update_item(updated_item: Item) -> dict:
     :param updated_item: class Item(BaseModel):
     :return: The updated item
     """
+    items = db.readData()
     idx_item_to_update = [i for i, x in enumerate(items) if x.id == updated_item.id]
     if idx_item_to_update:
         items.pop(idx_item_to_update[0])
         items.insert(idx_item_to_update[0], updated_item)
+        db.writeData(items)
         return dict(updated_item)
 
     strError = f"Item with ID {updated_item.id} doesn't exists, full update failed"
@@ -50,3 +53,24 @@ def update_item(updated_item: Item) -> dict:
         detail=strError,
         headers={"X-Fake-REST-API": strError},
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import logging
+    import platform
+    from fastapi import FastAPI
+    from definitions import HOSTNAME, PORT, tags_metadata
+
+    # logger config
+    logger = logging.getLogger()
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+    logging.info(f'Python version: {platform.python_version()}')
+    logging.info(f'Hostname: {platform.node()}')
+
+    app = FastAPI(openapi_tags=tags_metadata)
+    app.include_router(router)
+
+    uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")

@@ -3,62 +3,116 @@
 
 # What is FakeAPI
 
-FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no testing, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) and [MuleSoft](https://www.mulesoft.com/), to name a few.
+FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no verifications, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) and [MuleSoft](https://www.mulesoft.com/), to name a few.
 
->FaekAPI implements only `JSON` objects. Sorry no `XML` 😉
+FakeAPI is based on [FastAPI](https://fastapi.tiangolo.com/) framework. I'm using [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server.
 
-The script requires the following Python modules:
-* pydantic
-* uvicorn
-* fastapi
+>FakeAPI implements only `JSON` objects. Sorry no `XML` 😉
+
+Take a look at the file `requirement.txt` for the Python modules required:
 
 REST API methods implemented in FakeAPI:
 * **HTTP GET** to retrieve information
 * **HTTP POST** to create a new resource
-* **HTTP PUT** to Update/Replace a resource
+* **HTTP PUT** to make a complete Update/Replace
 * **HTTP DELETE** to delete a resource
-* **HTTP PATCH** to make a Partial Update/Modify
+* **HTTP PATCH** to make a partial Update/Modify
 * **HTTP TRACE** server reply with the header received
+
+# Initial Setup (Optionnal)
+This section is optionnal. You only need it if you want to make changes to the source code in a virtual environment. If this is not the case and you want to build the container, skip to the next section.
+
+1. Start by creating a new folder to hold your project called "FakeAPI":
+
+```sh
+mkdir fakeapi && cd fakeapi
+```
+2. Create and activate a virtual environment:
+
+```sh
+python3.11 -m venv .venv
+source .venv/bin/activate
+export PYTHONPATH=$PWD
+```
+>To deactivate the environment, just type `deactivate` in the shell or simply close it.
+
+>Don't forget to export `PYTHONPATH`.
+
+3. Install the necessary modules (make sure you have the latest pip installed):
+```sh
+pip install --upgrade pip
+pip install fastapi uvicorn pydantic
+```
+
+4. Create the `requirements.txt` file needed to build the image: 
+```sh
+pip freeze > requirements.txt
+```
+
+5. Make sure you're using the right Python interpreter, the one in the virtual environment:
+```sh
+(.venv) % which python3
+```
+
+The result should be something similar to this (your milage may vary 😀):
+```
+/Users/username/.../.venv/bin/python3
+```
 
 # How to use this image
 ## This is for educationnal **only**!
 
-## Build the image with the Dockerfile in your Python app project
-This is my `Dockerfile`:
+## Build the image with the Dockerfile
+
+This is the `Dockerfile` to build the image:
 ```Dockerfile
-# Build
-# docker build -t fakeapi .
+# Use the following command to build the Docker image:
+#   docker build -t fakeapi .
+# (Optional) If you suspect somethings wrong, you can start the container with the command:
+#   docker run -it --rm --name fakeapi fakeapi /bin/sh
+#
 FROM python:alpine
 
+# create the database directory
 RUN ["mkdir", "-p", "/usr/src/data"]
+
+# set the working directory for the app
+RUN ["mkdir", "-p", "/usr/src/app"]
 WORKDIR /usr/src/app
 
-COPY ["./src/requirements.txt", "./"]
-RUN ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
+# install dependencies
+RUN ["pip", "install", "fastapi", "uvicorn", "pydantic"]
 
-COPY ["./src/*", "./"]
+# copy the scripts to the folder
+COPY ["./fakeapi/main.py", "./"]
+COPY ["./fakeapi/app/*.py", "./app/"]
 
-CMD [ "python", "./app.py" ]
+# start the server
+CMD [ "python", "./main.py" ]
 ```
-
-After the build, the image should be `~80Mb`.
 
 ```sh
 docker build -t fakeapi .
 ```
+
+>The image should be `~85Mb`.
+```sh
+docker image ls fakeapi
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
-You can run the container with the database inside it. As soon as you exit the container, the data will be lost. You can map (`bind`) a local directory of the host inside the container. This way you keep the data after the container exit.
+You can run the container with the database outside it. Your data will be retained.
 
->Use an appropriate `hostname` if you start multiple containers. This is the only unique ID I found, as the process ID is alway `1` when the script runs inside the container. The logs will print the `hostname` so you know which container did what. Remember I made this script to test API Gateways.
+>Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container. Remember my primary goal is to test API Gateways.
 
-## Run the project with the data file inside the container.
+## Run the project with the data file outside the container.
 The data will be lost when the container exits.
 ```sh
-docker run -it --rm -v $PWD/src:/usr/src/data \
--e FAKEAPI_ENV=/usr/src/data/.env \
---name server1 --hostname server1 --network backend -p9443:9443 \
+docker run -it --rm -v $PWD:/usr/src/data \
+-e DATABASE=/usr/src/data/data.json \
+--name server1 --hostname server1 --network backend -p8000:8000 \
 fakeapi /bin/sh
 ```
 >If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
@@ -71,29 +125,16 @@ docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Run the project with the data file on the Docker host.
-Mount the container `/usr/src/data` directory on the current directory of the host. Data will be on the Docker host when the container exits. The container also run in interactive mode because of the `-it` switch. This way you can look at the logs.
-```sh
-docker run -it --rm -p 9443:9443 --name fakeapi \
---network=backend \
---ip 172.31.11.10 \
---env HOST='172.31.11.10' \
---env PORT=9443 \
--v $PWD:/usr/src/data \
---hostname fakeapi10 fakeapi
-```
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Shell access
 Get shell access to the container with the `/usr/src/data` directory mounted on the current directory of the host.
 ```sh
-docker run -it --rm --hostname fakeapi1 -v $PWD:/usr/src/data fakeapi /bin/sh
+docker run -it --rm --name fakeapi --hostname fakeapi -v $PWD:/usr/src/data fakeapi /bin/sh
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- Docs -->
 ## Docs URLs
-You can check the the interactive documentations made available by swagger UI at `http://localhost:9443/docs`.
+You can check the the interactive documentations made available by swagger UI at `http://localhost:8000/docs`.
 
 ![Documentation](images/docs.jpg)
 
@@ -107,7 +148,7 @@ Use this command to query of an object by it's ID:
 ```shell
 curl -H "Content-type: application/json" \
     -H "Accept: application/json" \
-    -i -L "http://localhost:9443/id/562641783"
+    -i -L "http://localhost:8000/id/562641783"
 ```
 This will send a `GET` request to the server. If it finds the object, the server returns the object in `JSON` format like this:
 
@@ -140,7 +181,7 @@ Use this command to add a new object:
 curl -X POST -H "Content-type: application/json" \
     -H "Accept: application/json" \
     -d '{"id":"123456789","description":"This is a description", "price": 99.99, "quantity": 100}' \
-    -i -L "http://localhost:9443/addItem/"
+    -i -L "http://localhost:8000/addItem/"
 ```
 
 This will send a `POST` request to the server. If it finds the object, the server returns an error. If it doesn't find the object, it adds it to the database:
@@ -174,7 +215,7 @@ The `PATCH` method is used for partial update of an existing object:
 curl -X PATCH -H "Content-type: application/json" \
     -H "Accept: application/json" \
     -d '{"id":"123456789", "newprice": 666.66}' \
-    -i -L "http://localhost:9443/patchItem/price/"
+    -i -L "http://localhost:8000/patchItem/price/"
 ```
 
 This will send a `PATCH` request to the server. If it finds the object, the server updates only the `price`. If it doesn't find the object, an error is returned:
@@ -207,7 +248,7 @@ The `TRACE` method is used for diagnosis purposes. It creates a loop-back test w
 ```shell
 curl -X TRACE -H "Content-type: application/json" \
     -H "Accept: application/json" -H "trace: trace-method-test"\
-    -i -L "http://localhost:9443/"
+    -i -L "http://localhost:8000/"
 ```
 
 This will send a `TRACE` request to the server and it will reply with the header of received from the client:
@@ -219,7 +260,7 @@ This will send a `TRACE` request to the server and it will reply with the header
     content-length: 184
     content-type: application/json
 
-    {"header":{"host":"localhost:9443","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"},"hostname":"localhost.local"}
+    {"header":{"host":"localhost:8000","user-agent":"curl/7.85.0","content-type":"application/json","accept":"application/json","trace":"trace-method-test"},"hostname":"localhost.local"}
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

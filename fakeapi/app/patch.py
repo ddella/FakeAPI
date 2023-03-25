@@ -16,7 +16,8 @@ If an existing resource is modified, either the 200 (OK) or 204 (No Content) res
 successful completion of the request.
 """
 from fastapi import APIRouter, HTTPException, status
-from REST_API.FakeAPI.app.definitions import IDPrice, items, IDQuantity
+from app.definitions import IDPrice, IDQuantity
+import app.database as db
 
 router = APIRouter()
 
@@ -39,9 +40,11 @@ def updatePrice(update_price: IDPrice) -> dict:
     :param update_price: class IDPrice(BaseModel)
     :return: The updated item
     """
+    items = db.readData()
     idx_item_to_update = [i for i, x in enumerate(items) if x.id == update_price.item_id]
     if idx_item_to_update:
         items[idx_item_to_update[0]].price = update_price.price
+        db.writeData(items)
         return dict(items[idx_item_to_update[0]])
 
     strError = f"Item with ID {update_price.item_id} doesn't exists, price update failed"
@@ -70,9 +73,11 @@ def updateQuantity(update_quantity: IDQuantity) -> dict:
     :param update_quantity: class IDPrice(BaseModel)
     :return: The updated item
     """
+    items = db.readData()
     idx_item_to_update = [i for i, x in enumerate(items) if x.id == update_quantity.item_id]
     if idx_item_to_update:
         items[idx_item_to_update[0]].quantity = update_quantity.quantity
+        db.writeData(items)
         return dict(items[idx_item_to_update[0]])
 
     strError = f"Item with ID {update_quantity.item_id} doesn't exists, quantity update failed"

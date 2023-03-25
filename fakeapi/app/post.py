@@ -10,7 +10,8 @@ Many times, the action performed by the POST method might not result in a resour
 In this case, either HTTP response code 200 (OK) or 204 (No Content) is the appropriate response status.
 """
 from fastapi import APIRouter, HTTPException, status
-from REST_API.FakeAPI.app.definitions import Item, items
+from app.definitions import Item
+import app.database as db
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ def add_item(item: Item) -> dict:
     :param item:
     :return: The data received in the body
     """
-    print(items)
+    items = db.readData()
     record = [d for d in items if d.id == item.id]
     if record:
         # record is a list with only one element, if ID is unique 😉
@@ -41,6 +42,7 @@ def add_item(item: Item) -> dict:
             headers={"X-Fake-REST-API": strError},
         )
     items.append(item)
+    db.writeData(items)
     return dict(item)
 
 

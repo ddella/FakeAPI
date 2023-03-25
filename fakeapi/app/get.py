@@ -15,9 +15,9 @@ Type of parameter(s) passed with the API:
 """
 
 from fastapi import APIRouter, Request, status, HTTPException
-# from fastapi import Response
 from fastapi.responses import RedirectResponse
-from REST_API.FakeAPI.app.definitions import items, IDPrice
+from app.definitions import IDPrice
+import app.database as db
 
 router = APIRouter()
 
@@ -49,6 +49,7 @@ async def get_all_items(request: Request) -> dict:
 
     :return: All the elements
     """
+    items = db.readData()
     return {"message": "Root of Fake REST API", "method": request.method, "items": items}
 
 @router.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
@@ -68,6 +69,7 @@ def path_parameter(item_id: int, price: float) -> dict:
     :param price: The price of the resource we want to retreive
     :return:
     """
+    items = db.readData()
     print(f'path_parameter -> ID={item_id} - Price:{price}')
     record = [d for d in items if d.id == item_id]
     if record and record[0].price == price:
@@ -110,6 +112,7 @@ def query_parameter(item_id: int, price: float) -> dict:
     :param item_id:
     :return:
     """
+    items = db.readData()
     print(f'query_parameter -> ID={item_id} - Price:{price}')
     record = [d for d in items if d.id == item_id]
     if record and record[0].price == price:
@@ -135,6 +138,7 @@ async def content_parameter(itemPrice: IDPrice) -> dict:
     :param itemPrice: Item ID and price of item we want to retreive
     :return: The item or error 404 if not found
     """
+    items = db.readData()
     print(f'Content -> ID={itemPrice.item_id} - Price: {itemPrice.price}')
     record = [d for d in items if d.id == itemPrice.item_id]
     if record and record[0].price == itemPrice.price:

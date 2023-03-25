@@ -1,7 +1,8 @@
 # app/delete.py
 # https://fastapi.tiangolo.com/it/tutorial/bigger-applications/
 from fastapi import status, HTTPException, APIRouter
-from REST_API.FakeAPI.app.definitions import items, ItemID
+from app.definitions import ItemID
+import app.database as db
 
 router = APIRouter()
 
@@ -18,9 +19,11 @@ async def deleteItem(item_id: ItemID) -> dict:
     :param item_id: ID of item to delete
     :return: Deleted item or error 404 if not found
     """
+    items = db.readData()
     idx_item_to_remove = [i for i, x in enumerate(items) if x.id == item_id.item_id]
     if idx_item_to_remove:
         bad_item = items.pop(idx_item_to_remove[0])
+        db.writeData(items)
         return dict(bad_item)
 
     strError = f"Item with ID {item_id.item_id} doesn't exists, delete failed"

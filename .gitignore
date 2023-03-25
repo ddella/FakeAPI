@@ -1,5 +1,8 @@
 .DS_Store
 **/.DS_Store
+**/.venv
+**/__pycache__
+*.txt
 .gitignore.swp
 .env
 00_Readme.txt
@@ -8,5 +11,3 @@ blank-README.md
 *.docx
 *.xlsx
 build.sh
-__pycache__
-
