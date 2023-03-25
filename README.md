@@ -61,10 +61,9 @@ The result should be something similar to this (your milage may vary 😀):
 ```
 /Users/username/.../.venv/bin/python3
 ```
-
+<a name="docker-container"></a>
 # How to use this image
 ## This is for educationnal **only**!
-<a name="docker-container"></a>
 ## Build the image with the Dockerfile
 
 This is the `Dockerfile` to build the image:
