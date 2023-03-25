@@ -19,14 +19,17 @@ REST API methods implemented in FakeAPI:
 * **HTTP PATCH** to make a partial Update/Modify
 * **HTTP TRACE** server reply with the header received
 
-# Initial Setup (Optionnal)
-This section is optionnal. You only need it if you want to make changes to the source code in a virtual environment. If this is not the case and you want to build the container, skip to the next section.
+# Python Virtual Environment Setup (Optionnal)
+This section is optionnal. Unless you want to play with the source code, you can skip to <a href="#docker-container">How to use this image</a> section.
 
-1. Start by creating a new folder to hold your project called "FakeAPI":
+
+1. Start by cloning the project and change directory where the source reside:
 
 ```sh
-mkdir fakeapi && cd fakeapi
+gh repo clone ddella/FakeAPI
+cd FakeAPI/src
 ```
+
 2. Create and activate a virtual environment:
 
 ```sh
@@ -61,7 +64,7 @@ The result should be something similar to this (your milage may vary 😀):
 
 # How to use this image
 ## This is for educationnal **only**!
-
+<a name="docker-container"></a>
 ## Build the image with the Dockerfile
 
 This is the `Dockerfile` to build the image:
