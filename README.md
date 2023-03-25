@@ -22,7 +22,6 @@ REST API methods implemented in FakeAPI:
 # Python Virtual Environment Setup (Optionnal)
 This section is optionnal. Unless you want to play with the source code, you can skip to <a href="#docker-container">How to use this image</a> section.
 
-
 1. Start by cloning the project and change directory where the source reside:
 
 ```sh
@@ -144,22 +143,18 @@ You can check the swagger documentation made available at `http://localhost:8000
 
 ![Documentation](images/docs.jpg)
 
-
-<!-- tests -->
 # let's get our hands dirty
 The best way to test the APIs is with [cURL](https://curl.se/). Look at the documentation from swagger. A cURL example is included with every function. 
-
-<!-- GET Example -->
 
 ## Example with GET method
 Use this command to query all the objects in the database:
 
-```shell
+```sh
 curl -H "Content-type: application/json" \
 -H "Accept: application/json" \
 -i -L "http://localhost:8000/api/items"
 ```
-This will send a `GET` request to the server. If it finds the object, the server returns the object in `JSON` format like this:
+This will send a `GET` request to the server and it will return all the object in `JSON` format:
 
     HTTP/1.1 200 OK
     date: Sun, 01 Jan 2023 00:00:00 GMT
