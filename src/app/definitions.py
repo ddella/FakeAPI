@@ -1,9 +1,14 @@
 # app/definitions.py
 from enum import Enum
 from pydantic import BaseModel
+from os import getenv
 
-HOSTNAME = "0.0.0.0"
-PORT = 8000
+# The file simulates a fake database for the data
+DATABASE = getenv('FAKEAPI_DATABASE', 'data.json')
+# The interface Uvicorn listens
+HOSTNAME = getenv('FAKEAPI_INTF', '0.0.0.0')
+# The TCO port for Uvicorn
+PORT = int(getenv('FAKEAPI_PORT', 8000))
 
 tags_metadata = [
     {

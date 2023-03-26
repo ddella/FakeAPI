@@ -1,14 +1,14 @@
 import logging
 import json
-from app.definitions import Category, Item
+from app.definitions import Category, Item, DATABASE
 
 from enum import Enum
 from pydantic import BaseModel, parse_file_as, parse_obj_as
 from fastapi.encoders import jsonable_encoder
-from os import getenv
+# from os import getenv
 
 # The file simulates a fake database for our data
-DATABASE = getenv('DATABASE', 'data.json')
+# DATABASE = getenv('DATABASE', 'data.json')
 
 def writeJSON(filename: str, myList: list[Item]) -> bool:
     """

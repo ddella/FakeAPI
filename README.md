@@ -3,21 +3,21 @@
 
 # What is FakeAPI
 
-FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no verifications, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) and [MuleSoft](https://www.mulesoft.com/), to name a few.
+FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no verifications, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, load balancer and reverse proxy, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) to name a few.
 
-FakeAPI is based on [FastAPI](https://fastapi.tiangolo.com/) framework. I'm using [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server.
+FakeAPI is based the [FastAPI](https://fastapi.tiangolo.com/) framework. I'm using [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server and [Pydantic](https://docs.pydantic.dev/) for data validation.
 
->FakeAPI implements only `JSON` objects. Sorry no `XML` 😉
+>FakeAPI implements only `JSON` objects and requires **Python 3.10+**
 
 Take a look at the file `requirement.txt` for the Python modules required:
 
-REST API methods implemented in FakeAPI:
+REST API methods implemented in FakeAPI are:
 * **HTTP GET** to retrieve information
 * **HTTP POST** to create a new resource
-* **HTTP PUT** to make a complete Update/Replace
+* **HTTP PUT** to make a complete update (all fields), if the item doesn't exists it is NOT added
 * **HTTP DELETE** to delete a resource
-* **HTTP PATCH** to make a partial Update/Modify
-* **HTTP TRACE** server reply with the header received
+* **HTTP PATCH** to make a partial update (only one field)
+* **HTTP TRACE** server reply with the header received in the body of the 
 
 # Python Virtual Environment Setup (Optionnal)
 This section is optionnal. Unless you want to play with the source code, you can skip to <a href="#docker-container">How to use this image</a> section.
@@ -42,13 +42,13 @@ export PYTHONPATH=$PWD
 
 3. Install the necessary modules (make sure you have the latest pip installed):
 ```sh
-pip install --upgrade pip
-pip install fastapi uvicorn pydantic
+pip3 install --upgrade pip
+pip3 install fastapi uvicorn pydantic
 ```
 
 4. Create the `requirements.txt` file needed to build the image: 
 ```sh
-pip freeze > requirements.txt
+pip3 freeze > requirements.txt
 ```
 
 5. Make sure you're using the right Python interpreter, the one in the virtual environment:
@@ -60,6 +60,12 @@ The result should be something similar to this (your milage may vary 😀):
 ```
 /Users/username/.../.venv/bin/python3
 ```
+
+6. Start the app with the command:
+```sh
+python3 main.py
+```
+
 <a name="docker-container"></a>
 
 # How to use this image (This is for educational **only**!)
@@ -85,14 +91,14 @@ WORKDIR /usr/src/app
 RUN ["pip", "install", "fastapi", "uvicorn", "pydantic"]
 
 # copy the scripts to the folder
-COPY ["./fakeapi/main.py", "./"]
-COPY ["./fakeapi/app/*.py", "./app/"]
+COPY ["./src/main.py", "./"]
+COPY ["./src/app/*.py", "./app/"]
 
 # start the server
 CMD [ "python", "./main.py" ]
 ```
 
-This command builds the image:
+This command builds the Docker image:
 
 ```sh
 docker build -t fakeapi .
@@ -106,16 +112,18 @@ docker image ls fakeapi
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
->**Note**: This project is about REST API and not database. The data is saved in a simple `json` file. The file is mapped outside the container on the Docker host. Multiple container can use the same file but at some point disaster is not too far away 😀 In real life, we should have used a database like [MongoDB](https://www.mongodb.com/).   
+>**Note**: This project is about REST API and not databases. The data is saved in a simple `json` file and is mapped outside the container on the Docker host. Multiple containers can use the same file but at some point disaster is not too far away 😀 In real life, we should have used a database, like [MongoDB](https://www.mongodb.com/).   
 
-Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways/Reverse Proxy and load balancer.
+Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
 
 ## Run the project with the data file outside the container.
 The data will be located on the Docker host in the directory you start the container.
 
 ```sh
 docker run -d --rm -v $PWD:/usr/src/data \
--e DATABASE=/usr/src/data/data.json \
+-e FAKEAPI_DATABASE=/usr/src/data/data.json \
+-e FAKEAPI_INTF=0.0.0.0 \
+-e FAKEAPI_PORT=8082 \
 --name server1 --hostname server1 --network backend -p8000:8000 \
 fakeapi
 ```

@@ -16,8 +16,8 @@ WORKDIR /usr/src/app
 RUN ["pip", "install", "fastapi", "uvicorn", "pydantic"]
 
 # copy the scripts to the folder
-COPY ["./fakeapi/main.py", "./"]
-COPY ["./fakeapi/app/*.py", "./app/"]
+COPY ["./src/main.py", "./"]
+COPY ["./src/app/*.py", "./app/"]
 
 # start the server
 CMD [ "python", "./main.py" ]
