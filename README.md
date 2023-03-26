@@ -123,11 +123,26 @@ The data will be located on the Docker host in the directory you start the conta
 docker run -d --rm -v $PWD:/usr/src/data \
 -e FAKEAPI_DATABASE=/usr/src/data/data.json \
 -e FAKEAPI_INTF=0.0.0.0 \
--e FAKEAPI_PORT=8082 \
+-e FAKEAPI_PORT=8000 \
 --name server1 --hostname server1 --network backend -p8000:8000 \
 fakeapi
 ```
 >If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
+
+## Run the project with the data file outside the container and HTTPS.
+This tutorial is not about OpenSSL. To use FakeAPI with HTTPS, you will need to generate a private key and a certificate. Check my tutorial on [OpenSSL](https://github.com/ddella/OpenSSL).
+
+```sh
+docker run -d --rm -v $PWD:/usr/src/data \
+-e FAKEAPI_DATABASE=/usr/src/data/data.json \
+-e FAKEAPI_INTF=0.0.0.0 \
+-e FAKEAPI_PORT=9443 \
+-e FAKEAPI_SERVER_KEY=server-key.pem \
+-e FAKEAPI_SERVER_CRT=server-crt.pem \
+--name server1 --hostname server1 --network backend -8000:9443 \
+fakeapi
+```
+>**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.
 
 ## Custom network (optional)
 FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I encourage you to run your containers in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
@@ -174,19 +189,16 @@ This will send a `GET` request to the server and it will return all the object i
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- LICENSE -->
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
 ## Contact
 Daniel Della-Noce - [Linkedin](https://www.linkedin.com/in/daniel-della-noce-2176b622/) - daniel@isociel.com
 
 Project Link: [https://github.com/ddella/FakeAPI](https://github.com/ddella/FakeAPI)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 * [Official documentation of FastAPI](https://fastapi.tiangolo.com/)
 * [Official documentation of Pydantic](https://docs.pydantic.dev/)

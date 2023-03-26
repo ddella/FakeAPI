@@ -3,12 +3,21 @@ from enum import Enum
 from pydantic import BaseModel
 from os import getenv
 
+# *** Environment Variables
 # The file simulates a fake database for the data
 DATABASE = getenv('FAKEAPI_DATABASE', 'data.json')
 # The interface Uvicorn listens
 HOSTNAME = getenv('FAKEAPI_INTF', '0.0.0.0')
 # The TCO port for Uvicorn
 PORT = int(getenv('FAKEAPI_PORT', 8000))
+
+# Returns empty string if the key doesn't exist, so HTTP instead of HTTPS
+SERVER_CRT = getenv("FAKEAPI_SERVER_CRT", "")
+# logging.info(f'Server Certificate={SERVER_CRT}')
+
+# Returns empty string if the key doesn't exist, so HTTP instead of HTTPS
+SERVER_KEY = getenv("FAKEAPI_SERVER_KEY", "")
+# logging.info(f'Server Private Key={SERVER_KEY}')
 
 tags_metadata = [
     {

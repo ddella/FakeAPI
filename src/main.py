@@ -3,7 +3,7 @@ import uvicorn
 import logging
 import platform
 from fastapi import FastAPI
-from app.definitions import tags_metadata, HOSTNAME, PORT
+from app.definitions import tags_metadata, HOSTNAME, PORT, SERVER_CRT, SERVER_KEY
 
 import app.delete as delete     # DELETE method
 import app.get as get           # GET method
@@ -23,6 +23,11 @@ if __name__ == "__main__":
     logging.info(f'Python version: {platform.python_version()}')
     logging.info(f'Hostname: {platform.node()} listening on interface {HOSTNAME}:{PORT}')
 
+    if not SERVER_KEY:
+        logging.info(f'HTTP activated')
+    else:
+        logging.info(f'HTTPS activated with Server Certificate={SERVER_CRT} - Server Private Key={SERVER_KEY}')
+
     app = FastAPI(openapi_tags=tags_metadata)
     app.include_router(delete.router)
     app.include_router(get.router)
@@ -33,4 +38,15 @@ if __name__ == "__main__":
     app.include_router(put.router)
     app.include_router(trace.router)
 
-    uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")
+    # uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")
+    # Start the server
+    uvicorn.run(app, host=HOSTNAME, port=PORT,
+                ssl_keyfile=SERVER_KEY,
+                ssl_certfile=SERVER_CRT,
+                # ssl_ca_certs="ca-chain.pem",
+                # ssl_ciphers="TLSv1.2",
+                # log_level="info")
+                # log requests from client
+                access_log=True,
+                log_level="info")
+
