@@ -45,8 +45,5 @@ if __name__ == "__main__":
                 ssl_certfile=SERVER_CRT,
                 # ssl_ca_certs="ca-chain.pem",
                 # ssl_ciphers="TLSv1.2",
-                # log_level="info")
-                # log requests from client
                 access_log=True,
                 log_level="info")
-

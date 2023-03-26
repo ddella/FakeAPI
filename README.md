@@ -116,7 +116,7 @@ docker image ls fakeapi
 
 Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
 
-## Run the project with the data file outside the container.
+## Run the project with HTTP
 The data will be located on the Docker host in the directory you start the container.
 
 ```sh
@@ -129,7 +129,7 @@ fakeapi
 ```
 >If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
 
-## Run the project with the data file outside the container and HTTPS.
+## Run the project with HTTPS
 This tutorial is not about OpenSSL. To use FakeAPI with HTTPS, you will need to generate a private key and a certificate. Check my tutorial on [OpenSSL](https://github.com/ddella/OpenSSL).
 
 ```sh
