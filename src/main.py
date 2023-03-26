@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # logger config
     logger = logging.getLogger()
     logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s: %(levelname)s %(funcName)s %(message)s',
+                        format='%(levelname)s: %(asctime)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
     logging.info(f'Python version: {platform.python_version()}')
     logging.info(f'Hostname: {platform.node()} listening on interface {HOSTNAME}:{PORT}')
@@ -38,7 +38,6 @@ if __name__ == "__main__":
     app.include_router(put.router)
     app.include_router(trace.router)
 
-    # uvicorn.run(app, host=HOSTNAME, port=PORT, log_level="info")
     # Start the server
     uvicorn.run(app, host=HOSTNAME, port=PORT,
                 ssl_keyfile=SERVER_KEY,
