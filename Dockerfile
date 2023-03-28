@@ -16,8 +16,7 @@ WORKDIR /usr/src/app
 RUN ["pip", "install", "fastapi", "uvicorn", "pydantic", "pydantic[email]", "passlib", "PyJWT", "redis"]
 
 # copy the scripts to the folder
-COPY ["./src/main.py", "./"]
-COPY ["./src/app/*.py", "./app/"]
+COPY src/ .
 
 # start the server
 CMD [ "python", "./main.py" ]

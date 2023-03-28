@@ -100,8 +100,7 @@ WORKDIR /usr/src/app
 RUN ["pip", "install", "fastapi", "uvicorn", "pydantic", "pydantic[email]", "passlib", "PyJWT", "redis"]
 
 # copy the scripts to the folder
-COPY ["./src/main.py", "./"]
-COPY ["./src/app/*.py", "./app/"]
+COPY src/ .
 
 # start the server
 CMD [ "python", "./main.py" ]
@@ -149,7 +148,7 @@ docker run -d --rm -v $PWD:/usr/src/data \
 -e FAKEAPI_PORT=9443 \
 -e FAKEAPI_SERVER_KEY=server-key.pem \
 -e FAKEAPI_SERVER_CRT=server-crt.pem \
---name server1 --hostname server1 --network backend -8000:9443 \
+--name server1 --hostname server1 --network backend -p 8000:9443 \
 fakeapi
 ```
 >**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.

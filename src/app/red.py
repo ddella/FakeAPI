@@ -19,7 +19,7 @@ container_id = platform.node()
 
 # Connect to redis and set num_requests to 0 if it doesn't exist
 try:
-    redis = Redis(host='localhost', port=6379)
+    redis = Redis(host='redis', port=6379)
     # redis.set(container_id, 0)
     redis.setnx(container_id, 0)
 except exceptions.ConnectionError:
