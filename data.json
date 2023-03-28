@@ -1,9 +1,0 @@
-[
-   {
-      "id": 100,
-      "description": "This is a description",
-      "price": 99.99,
-      "quantity": 100,
-      "category": "clothes"
-   }
-]

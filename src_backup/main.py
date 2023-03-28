@@ -13,8 +13,6 @@ import app.patch as patch       # PATCH method
 import app.post as post         # POST method
 import app.put as put           # PUT method
 import app.trace as trace       # TRACE method
-import jwtauth.users as users   # module for users
-import app.red as redis         # GET method with Redis database
 
 if __name__ == "__main__":
     # logger config
@@ -39,12 +37,6 @@ if __name__ == "__main__":
     app.include_router(post.router)
     app.include_router(put.router)
     app.include_router(trace.router)
-
-    # JWT auth modules
-    app.include_router(users.router)
-
-    # Redis example
-    app.include_router(redis.router)
 
     # Start the server
     uvicorn.run(app, host=HOSTNAME, port=PORT,

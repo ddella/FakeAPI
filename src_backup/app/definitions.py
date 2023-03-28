@@ -8,7 +8,7 @@ from os import getenv
 DATABASE = getenv('FAKEAPI_DATABASE', 'data.json')
 # The interface Uvicorn listens
 HOSTNAME = getenv('FAKEAPI_INTF', '0.0.0.0')
-# The TCP port for Uvicorn
+# The TCO port for Uvicorn
 PORT = int(getenv('FAKEAPI_PORT', 8000))
 
 # Returns empty string if the key doesn't exist, so HTTP instead of HTTPS

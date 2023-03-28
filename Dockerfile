@@ -13,7 +13,7 @@ RUN ["mkdir", "-p", "/usr/src/app"]
 WORKDIR /usr/src/app
 
 # install dependencies
-RUN ["pip", "install", "fastapi", "uvicorn", "pydantic"]
+RUN ["pip", "install", "fastapi", "uvicorn", "pydantic", "pydantic[email]", "passlib", "PyJWT", "redis"]
 
 # copy the scripts to the folder
 COPY ["./src/main.py", "./"]

@@ -1,0 +1,9 @@
+[
+   {
+      "id": "cf463b56-0ae2-42da-986d-aef597c9d39a",
+      "fullname": "User3 Name3",
+      "email": "user3@example.com",
+      "password": "$pbkdf2-sha256$29000$.B8jpFQqJYTQupey9t7b2w$PJNdYBp3nmxidWoAahlRJkiS2ChUKeJ9RV3/v1B42fA",
+      "role": "admin"
+   }
+]

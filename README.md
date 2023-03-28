@@ -43,7 +43,16 @@ export PYTHONPATH=$PWD
 3. Install the necessary modules (make sure you have the latest pip installed):
 ```sh
 pip3 install --upgrade pip
-pip3 install fastapi uvicorn pydantic
+pip3 install fastapi uvicorn pydantic pydantic[email]
+```
+>**Note**: If you get the following error message, it has nothing to do with Python, Pydantic, or your virtual environment. It's a `zsh` shell error.
+
+    (.venv) user@MacBook src % pip3 install pydantic[email]
+    zsh: no matches found: pydantic[email]
+
+To avoid this, you can simply put the argument in quotes like this:
+```sh
+pip install 'pydantic[email]'
 ```
 
 4. Create the `requirements.txt` file needed to build the image: 
@@ -72,7 +81,7 @@ python3 main.py
 ## Build the Docker image
 
 This is the `Dockerfile` to build the image:
-```Dockerfile
+```Dockerfilepych
 # Use the following command to build the Docker image:
 #   docker build -t fakeapi .
 # (Optional) If you suspect somethings wrong, you can start the container with the command:
@@ -88,7 +97,7 @@ RUN ["mkdir", "-p", "/usr/src/app"]
 WORKDIR /usr/src/app
 
 # install dependencies
-RUN ["pip", "install", "fastapi", "uvicorn", "pydantic"]
+RUN ["pip", "install", "fastapi", "uvicorn", "pydantic", "pydantic[email]", "passlib", "PyJWT", "redis"]
 
 # copy the scripts to the folder
 COPY ["./src/main.py", "./"]
@@ -135,6 +144,7 @@ This tutorial is not about OpenSSL. To use FakeAPI with HTTPS, you will need to 
 ```sh
 docker run -d --rm -v $PWD:/usr/src/data \
 -e FAKEAPI_DATABASE=/usr/src/data/data.json \
+-e FAKEAPI_USR_DATABASE=/usr/src/data/users.json \
 -e FAKEAPI_INTF=0.0.0.0 \
 -e FAKEAPI_PORT=9443 \
 -e FAKEAPI_SERVER_KEY=server-key.pem \
