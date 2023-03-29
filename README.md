@@ -148,10 +148,22 @@ docker run -d --rm -v $PWD:/usr/src/data \
 -e FAKEAPI_PORT=9443 \
 -e FAKEAPI_SERVER_KEY=server-key.pem \
 -e FAKEAPI_SERVER_CRT=server-crt.pem \
---name server1 --hostname server1 --network backend -p 8000:9443 \
+--name server1 --hostname server1 --network backend -p 9443:9443 \
 fakeapi
 ```
 >**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.
+
+If you start multiple servers and give them names like `server[1-n]`, you can remove all the containers with the command:
+```sh
+docker container rm -f $(docker container ls -f name=server -q)
+```
+
+### Redis
+Start Redis with the following command:
+```sh
+docker run --name redis --hostname redis -d --rm --network backend redis
+```
+>**Note**: No need to map the Redis port, since it's only accessed by the FakeAPI.
 
 ## Custom network (optional)
 FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I encourage you to run your containers in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.

@@ -2,7 +2,7 @@
 """
 Example with a simple GET against a Redis database.
 You can start a Redis Docker container with the command:
-    docker run --name redis --hostname redis -d --rm -p 6379:6379 redis
+    docker run --name redis --hostname redis -d --rm --network backend -p 6379:6379 redis
 
 If this script is run on the host, the Redis server is at 'localhost'
 If this script is run in a container, the Redis server is at 'redis'
