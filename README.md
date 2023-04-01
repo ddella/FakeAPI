@@ -72,6 +72,7 @@ docker image ls fakeapi:2.0
 ```
 
 Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`:
+
     __pycache__
     **/__pycache__
     .DS_Store
