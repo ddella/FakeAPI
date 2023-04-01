@@ -46,7 +46,7 @@ docker run -it --rm --network backend --name redis.cli redis redis-cli -h redis.
 ```
 
 ## Custom network (optional)
-FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I encourage you to run your containers in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
+FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I you can't avoid to run this project in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
 
 ```sh
 docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.11.128/25 --gateway=172.31.11.1 backend

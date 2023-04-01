@@ -11,7 +11,7 @@ docker compose -f docker-compose.yml --project-name fakeapi up -d
 2. To stop the FakeAPI and Redis servers, just type the following command:
 
 ```sh
-docker container rm -f server1 redis.lab
+docker compose rm -f -s fakeapi
 ```
 
 ## YAML file to start the FakeAPI Server
@@ -19,8 +19,8 @@ The `docker-compose.yml` file:
 
 ```yaml
 # docker-compose.yml
-# Start the container: docker compose -f docker-compose.yml --project-name fakeapi up -d
-# Stop the container: docker container rm -f server1 redis.lab
+# Start the container(s): docker compose -f docker-compose.yml --project-name fakeapi up -d
+# Stop the container(s): docker compose rm -f -s fakeapi
 networks:
    backend:
       name: backend
