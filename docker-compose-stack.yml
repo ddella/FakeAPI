@@ -9,7 +9,8 @@ networks:
       external: true
 
 services:
-  web:
+  fakeapi:
+    hostname: "{{.Service.Name}}-{{.Node.ID}}"
     image: fakeapi
     ports:
       - "9445:9445"
