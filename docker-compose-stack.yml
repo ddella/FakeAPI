@@ -1,4 +1,6 @@
-# docker stack deploy -c docker-compose-stack.yml fakeapi
+# Start the container(s): docker stack deploy -c docker-compose-stack.yml fakeapi
+# Stop the container(s): docker stack rm fakeapi
+#
 # Create the network, on the manager node **ONLY**
 #   docker network create -d overlay --subnet=172.21.5.0/24 \
 #   --gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
