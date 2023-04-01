@@ -24,6 +24,19 @@ REST API methods implemented in FakeAPI are:
 * **HTTP TRACE** server reply with the header received in the body of the 
 
 # How to use this image (This is for educational **only**!)
+## Clone the project
+Use the command to clone the project:
+```sh
+gh repo clone ddella/FakeAPI
+```
+
+If you can't use `gh` to download the project, use cURL:
+```sh
+curl -L -o fakeapi.zip https://github.com/ddella/FakeAPI/archive/refs/heads/main.zip
+unzip fakeapi.zip
+cd FakeAPI-main
+```
+
 ## Build the Docker image
 
 This is the `Dockerfile` needed to build the Docker image:
