@@ -71,12 +71,12 @@ docker build -t fakeapi:2.0 .
 docker image ls fakeapi:2.0
 ```
 
-    Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`:
-        __pycache__
-        **/__pycache__
-        .DS_Store
-        **/.DS_Store
-        **/venv
+Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`:
+    __pycache__
+    **/__pycache__
+    .DS_Store
+    **/.DS_Store
+    **/venv
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
