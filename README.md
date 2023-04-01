@@ -3,9 +3,13 @@
 
 # What is FakeAPI
 
-FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no verifications, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, load balancer and reverse proxy, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) to name a few.
+FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no verifications, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, load balancer and reverse proxy, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) to name a few. The data is saved in a Redis database.
 
-FakeAPI is based the [FastAPI](https://fastapi.tiangolo.com/) framework. I'm using [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server and [Pydantic](https://docs.pydantic.dev/) for data validation. All the data is saved in a Redis database.
+FakeAPI is based on:
+* [FastAPI](https://fastapi.tiangolo.com/) framework
+* [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server
+* [Pydantic](https://docs.pydantic.dev/) for data validation
+* [Redis](https://redis.io)
 
 >FakeAPI implements only `JSON` objects and requires **Python 3.10+**
 
@@ -22,17 +26,14 @@ REST API methods implemented in FakeAPI are:
 # How to use this image (This is for educational **only**!)
 ## Build the Docker image
 
-This is the `Dockerfile` to build the image:
-```Dockerfilepych
+This is the `Dockerfile` needed to build the Docker image:
+```Dockerfile
 # Use the following command to build the Docker image:
 #   docker build -t fakeapi .
 # (Optional) If you suspect somethings wrong, you can start the container with the command:
 #   docker run -it --rm --name fakeapi fakeapi /bin/sh
 #
 FROM python:alpine
-
-# create the database directory
-RUN ["mkdir", "-p", "/usr/src/data"]
 
 # set the working directory for the app
 RUN ["mkdir", "-p", "/usr/src/app"]
@@ -48,73 +49,24 @@ COPY src/ .
 CMD [ "python", "./main.py" ]
 ```
 
-This command builds the Docker image:
-
+Use this command to build the Docker image:
 ```sh
-docker build -t fakeapi .
+docker build -t fakeapi:2.0 .
 ```
 
 >The image should be `~135Mb`.
 ```sh
-docker image ls fakeapi
+docker image ls fakeapi:2.0
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
-Start the fakeAPI and Redis servers in a custom network, to have Docker's DNS for name resolution.  
+The FakeAPI project is meant to run as Docker containers.
 
-Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
-
-## Run the project with HTTP
-Starts the container with `HTTP` only.
-
-```sh
-docker run -d --rm \
--e REDIS_HOSTNAME=redis.lab \
--e REDIS_PORT=6379 \
--e FAKEAPI_INTF=0.0.0.0 \
--e FAKEAPI_PORT=8000 \
---name server1 --hostname server1 --network backend -p8000:8000 \
-fakeapi
-```
->If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
-
-## Run the project with HTTPS
-This tutorial is not about OpenSSL. To use FakeAPI with `HTTPS`, you will need to generate a private key and a certificate. Check my tutorial on [OpenSSL](https://github.com/ddella/OpenSSL). I've included a private key and a self signed certificate.
-
-```sh
-docker run -d --rm \
--e REDIS_HOSTNAME=redis.lab \
--e REDIS_PORT=6379 \
--e FAKEAPI_INTF=0.0.0.0 \
--e FAKEAPI_PORT=9443 \
--e FAKEAPI_SERVER_KEY=server-key.pem \
--e FAKEAPI_SERVER_CRT=server-crt.pem \
---name server1 --hostname server1 --network backend -p 9443:9443 \
-fakeapi
-```
->**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.
-
-### Redis
-Start Redis with the following command:
-```sh
-docker run --name redis.lab --hostname redis.lab -d --rm --network backend redis
-```
->**Note**: No need to map the Redis port on the Docker host, since it's only accessed by the FakeAPI. In case you want to expose the port, add `-p 6379:6379` to the command line.
-
-**Optional:** You can start a Redis client for troubleshooting. Note that the hostname is 'redis.lab' because we're in the same network as the server. Don't use 'localhost' as this container is in the same network as the Redis server and Docker's DNS will take care of resolution:
-```sh
-docker run -it --rm --network backend redis redis-cli -h redis.lab
-```
-
-## Custom network (optional)
-FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I encourage you to run your containers in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
-
-```sh
-docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.11.128/25 --gateway=172.31.11.1 backend
-```
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+1. Run a standalone container of FakeAPI and Redis [standalone](standalone.md)
+2. Run a standalone container of FakeAPI and Redis with Docker Compose [Docker Compose](docker_compose.md)
+3. Run all containers as a Stack in a Docker Swarm [Docker Swarm Stack](swarm_stack.md)
 
 ## Docker Swarm stack
 This is a `YAML` file to start multiple copies of FakeAPI with the Redis database on a Docker Swarm
