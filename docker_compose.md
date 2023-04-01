@@ -57,6 +57,6 @@ services:
 ## Logging
 In case you run into problems, you can start logging with the command:
 ```sh
-docker logs server1
+docker logs -f server1
 ```
 <p align="left">(<a href="README.md">back to the main page</a>)</p>

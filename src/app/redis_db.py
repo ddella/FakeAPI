@@ -24,13 +24,13 @@ from app.logs import logger
 
 # Get the id of the docker container we're running in (it's our hostname)
 container_id = platform.node()
+visited_key = 'visited:' + container_id
 
 # Connect to redis and create a key for number of time visited, if it didn't exist
 try:
     redis = Redis(host=REDIS_HOSTNAME, port=REDIS_PORT, db=0, socket_connect_timeout=5,
                   socket_timeout=5, decode_responses=True, charset='utf-8')
     # redis.set(container_id, 0)
-    visited_key = 'visited:' + container_id
     try:
         setnx_result = redis.setnx(visited_key, 0)
     except Exception as e:
@@ -41,7 +41,7 @@ try:
         else:
             logger.info(f'Key: "{visited_key}" already exist')
 except Exception as e:
-    logger.error(f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}')
+    logger.error(f'Redis connection failed: {REDIS_HOSTNAME}:{REDIS_PORT} - {e}')
 else:
     logger.info(f'Connected to Redis database {REDIS_HOSTNAME}:{REDIS_PORT}')
 
@@ -51,7 +51,7 @@ def get_hit_count():
     retries = 3
     while True:
         try:
-            return redis.incr(container_id)
+            return redis.incr(visited_key)
         except exceptions.ConnectionError:
             if retries == 0:
                 return -1
@@ -66,7 +66,7 @@ def generate_html_response(num_visited: int):
         </head>
         <body>
             <h2>You visited me {num_visited}</h2>
-            <h2>Container ID is {container_id}</h2>
+            <h2>Container ID is {visited_key}</h2>
         </body>
     </html>
     """
