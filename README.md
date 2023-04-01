@@ -131,7 +131,8 @@ networks:
       external: true
 
 services:
-  web:
+  fakeapi:
+    hostname: "{{.Service.Name}}-{{.Node.ID}}"
     image: fakeapi
     ports:
       - "9445:9445"
@@ -165,7 +166,7 @@ docker stack ps fakeapi
 docker stack rm fakeapi
 docker stack services fakeapi
 ```
-
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Docs URLs
 You can check the swagger documentation made available at `http://localhost:8000/docs`. This will list all the methods with it's associated endpoints.

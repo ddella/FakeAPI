@@ -1,0 +1,34 @@
+# docker stack deploy -c docker-compose-stack.yml fakeapi
+# Create the network, on the manager node **ONLY**
+#   docker network create -d overlay --subnet=172.21.5.0/24 \
+#   --gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
+version: "3.9"
+networks:
+   backend:
+      name: ovrl_stack_fakeapi
+      external: true
+
+services:
+  web:
+    image: fakeapi
+    ports:
+      - "9445:9445"
+    deploy:
+      replicas: 6
+    environment:
+      - REDIS_HOSTNAME=redis.lab \
+      - REDIS_PORT=6379 \
+      - FAKEAPI_INTF=0.0.0.0
+      - FAKEAPI_PORT=9445
+      - FAKEAPI_SERVER_KEY=server-key.pem
+      - FAKEAPI_SERVER_CRT=server-crt.pem
+    networks:
+      - backend
+
+  redis:
+    image: redis:alpine
+    deploy:
+      replicas: 1
+    hostname: redis.lab
+    networks:
+       backend:
