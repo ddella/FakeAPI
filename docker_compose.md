@@ -1,55 +1,72 @@
 # Docker Compose for the FakeAPI container
 
 ## Docker Compose commands
-
 This is the `yaml` file to run the FakeAPI Server detached.
 
 1. To start the FakeAPI server, just type the following command:
 
 ```sh
-docker compose -f fakeapi.yml --project-name fakeapi up -d
+docker compose -f docker-compose.yml --project-name fakeapi up -d
 ```
-2. To stop the FakeAPI server, just type the following command:
+2. To stop the FakeAPI and Redis servers, just type the following command:
 
 ```sh
-docker container rm -f server1
+docker container rm -f server1 redis.lab
 ```
 
 ## YAML file to start the FakeAPI Server
+Use Docker Compose to start the servers
+```sh
+docker compose -f docker-compose.yml --project-name fakeapi up -d
+```
+
+Use the followinf command to stop both servers:
+```sh
+docker container rm -f server1 redis.lab
+```
+
+The `docker-compose.yml` file:
 
 ```yaml
-# fakeapi.yml
-# Start the container: docker compose -f fakeapi.yml --project-name fakeapi up -d
-# Stop the container: docker container rm -f server1
+# docker-compose.yml
+# Start the container: docker compose -f docker-compose.yml --project-name fakeapi up -d
+# Stop the container: docker container rm -f server1 redis.lab
 networks:
    backend:
       name: backend
-
 services:
-  fakeapi1:
-    image: fakeapi
-    volumes:
-      - type: bind
-        source: $PWD
-        target: /usr/src/data
-        # read_only: true
+  fakeapi:
+    image: fakeapi:2.0
     ports:
       - "8000:8000"
     restart: unless-stopped
     environment:
-      - FAKEAPI_DATABASE=/usr/src/data/data.json
+      - REDIS_HOSTNAME=redis.lab
+      - REDIS_PORT=6379
       - FAKEAPI_INTF=0.0.0.0
       - FAKEAPI_PORT=8000
+      - FAKEAPI_SERVER_KEY=server-key.pem
+      - FAKEAPI_SERVER_CRT=server-crt.pem
     container_name: server1
     hostname: server1
     domainname: backend.com
     networks:
       backend:
-        ipv4_address: 172.31.11.11
+
+  redis:
+    image: redis:alpine
+    deploy:
+      replicas: 1
+    hostname: redis.lab
+    container_name: redis.lab
+    networks:
+       backend:
 ```
+<p align="left">(<a href="README.md">back to the main page</a>)</p>
 
-## Useful Links
-
-- [The Compose Specification](https://github.com/compose-spec/compose-spec/blob/master/spec.md)
-
-[_< back_](README.md)
+## Logging
+In case you run into problems, you can start logging with the command:
+```sh
+docker logs server1
+```
+<p align="left">(<a href="README.md">back to the main page</a>)</p>

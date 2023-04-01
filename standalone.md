@@ -29,7 +29,7 @@ docker run -d --rm \
 -e FAKEAPI_SERVER_KEY=server-key.pem \
 -e FAKEAPI_SERVER_CRT=server-crt.pem \
 --name server1 --hostname server1 --network backend -p 9443:9443 \
-fakeapi
+fakeapi:2.0
 ```
 >**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.
 
@@ -51,4 +51,4 @@ FakeAPI runs on a custom Docker network. This workshop is not about Docker custo
 ```sh
 docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.11.128/25 --gateway=172.31.11.1 backend
 ```
-<p align="right">(<a href="README.md">back to the main page</a>)</p>
+<p align="left">(<a href="README.md">back to the main page</a>)</p>

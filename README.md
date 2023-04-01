@@ -62,7 +62,7 @@ docker image ls fakeapi:2.0
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
-The FakeAPI project is meant to run as Docker containers.
+The FakeAPI project is meant to run as Docker containers. You will need at least one FakeAPI container and a Redis container.
 
 1. Run a standalone container of FakeAPI and Redis [standalone](standalone.md)
 2. Run a standalone container of FakeAPI and Redis with Docker Compose [Docker Compose](docker_compose.md)
