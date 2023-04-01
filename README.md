@@ -64,61 +64,9 @@ docker image ls fakeapi:2.0
 # Run the project
 The FakeAPI project is meant to run as Docker containers. You will need at least one FakeAPI container and a Redis container.
 
-1. Run a standalone container of FakeAPI and Redis [standalone](standalone.md)
+1. Run a standalone container of FakeAPI and Redis [standalone](docker.md)
 2. Run a standalone container of FakeAPI and Redis with Docker Compose [Docker Compose](docker_compose.md)
 3. Run all containers as a Stack in a Docker Swarm [Docker Swarm Stack](swarm_stack.md)
-
-## Docker Swarm stack
-This is a `YAML` file to start multiple copies of FakeAPI with the Redis database on a Docker Swarm
-
-```yaml
-# docker stack deploy -c docker-compose-stack.yml fakeapi
-# Create the network, on the manager node **ONLY**
-#   docker network create -d overlay --subnet=172.21.5.0/24 \
-#   --gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
-version: "3.9"
-networks:
-   backend:
-      name: ovrl_stack_fakeapi
-      external: true
-
-services:
-  fakeapi:
-    hostname: "{{.Service.Name}}-{{.Node.ID}}"
-    image: fakeapi
-    ports:
-      - "9445:9445"
-    deploy:
-      replicas: 6
-    environment:
-      - REDIS_HOSTNAME=redis.lab \
-      - REDIS_PORT=6379 \
-      - FAKEAPI_INTF=0.0.0.0
-      - FAKEAPI_PORT=9445
-      - FAKEAPI_SERVER_KEY=server-key.pem
-      - FAKEAPI_SERVER_CRT=server-crt.pem
-    networks:
-      - backend
-
-  redis:
-    image: redis:alpine
-    deploy:
-      replicas: 1
-    hostname: redis.lab
-    networks:
-       backend:
-```
-
-Somme commands to check the Swarm stack
-
-```sh
-docker stack deploy --compose-file docker-compose-stack.yml fakeapi
-docker stack ls
-docker stack ps fakeapi
-docker stack rm fakeapi
-docker stack services fakeapi
-```
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Docs URLs
 You can check the swagger documentation made available at `http://localhost:8000/docs`. This will list all the methods with it's associated endpoints.
