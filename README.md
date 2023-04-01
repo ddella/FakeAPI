@@ -29,9 +29,9 @@ REST API methods implemented in FakeAPI are:
 This is the `Dockerfile` needed to build the Docker image:
 ```Dockerfile
 # Use the following command to build the Docker image:
-#   docker build -t fakeapi .
+#   docker build -t fakeapi:2.0 .
 # (Optional) If you suspect somethings wrong, you can start the container with the command:
-#   docker run -it --rm --name fakeapi fakeapi /bin/sh
+#   docker run -it --rm --name fakeapi fakeapi:2.0 /bin/sh
 #
 FROM python:alpine
 

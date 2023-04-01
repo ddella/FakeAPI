@@ -2,12 +2,12 @@
 
 ## Docker Swarm Stack commands
 
-1. To start the FakeAPI server, just type the following command:
+1. To start the FakeAPI in a Docker Swarm as a stack, type the following command:
 
 ```sh
 docker stack deploy -c docker-compose-stack.yml fakeapi
 ```
-2. To stop the FakeAPI and Redis servers, just type the following command:
+2. To stop the stack of FakeAPI and Redis servers in a Docker Swarm, type the following command:
 
 ```sh
 docker stack rm fakeapi

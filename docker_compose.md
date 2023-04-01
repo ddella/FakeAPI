@@ -1,6 +1,6 @@
 # Docker Compose for the FakeAPI container
 
-## Docker Compose commands
+## Docker Compose commands to start the FakeAPI Server
 This is the `yaml` file to run the FakeAPI Server detached.
 
 1. To start the FakeAPI server, just type the following command:
@@ -15,16 +15,6 @@ docker container rm -f server1 redis.lab
 ```
 
 ## YAML file to start the FakeAPI Server
-Use Docker Compose to start the servers
-```sh
-docker compose -f docker-compose.yml --project-name fakeapi up -d
-```
-
-Use the followinf command to stop both servers:
-```sh
-docker container rm -f server1 redis.lab
-```
-
 The `docker-compose.yml` file:
 
 ```yaml
