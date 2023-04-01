@@ -31,13 +31,19 @@ try:
                   socket_timeout=5, decode_responses=True, charset='utf-8')
     # redis.set(container_id, 0)
     visited_key = 'visited:' + container_id
-    setnx_result = redis.setnx(visited_key, 0)
-    if setnx_result:
-        logger.info(f'Key: "{visited_key}" created')
+    try:
+        setnx_result = redis.setnx(visited_key, 0)
+    except Exception as e:
+        logger.error(f'Error: {e}')
     else:
-        logger.info(f'Key: "{visited_key}" already exist')
-except exceptions.ConnectionError:
-    logger(f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}')
+        if setnx_result:
+            logger.info(f'Key: "{visited_key}" created')
+        else:
+            logger.info(f'Key: "{visited_key}" already exist')
+except Exception as e:
+    logger.error(f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}')
+else:
+    logger.info(f'Connected to Redis database {REDIS_HOSTNAME}:{REDIS_PORT}')
 
 router = APIRouter()
 

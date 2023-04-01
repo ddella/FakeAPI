@@ -34,7 +34,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format='%(levelname)s: %(asctime)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-    logging.info(f'Python version: {platform.python_version()}')
     logging.info(f'Hostname: {platform.node()} listening on interface {HOSTNAME}:{PORT}')
 
     if not SERVER_KEY:

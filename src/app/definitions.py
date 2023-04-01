@@ -13,7 +13,7 @@ PORT = int(getenv('FAKEAPI_PORT', 8000))
 Redis database
 If Redis is run as a container, the hostname should be the same as the '--name' parameter
 """
-REDIS_HOSTNAME: str = 'localhost'
+REDIS_HOSTNAME = getenv('REDIS_HOSTNAME', 'localhost')
 REDIS_PORT = getenv('REDIS_PORT', 6379)
 
 # Returns empty string if the key doesn't exist, so HTTP instead of HTTPS

@@ -58,7 +58,6 @@ def get_id_price(item_id, price) -> dict:
             headers={"X-Fake-REST-API": strError},
         )
 
-
 @router.get("/", response_class=RedirectResponse, include_in_schema=False)
 async def docs():
     """
@@ -83,7 +82,7 @@ async def get_all_keys():
     # async def get_all_keys(request: Request) -> dict:
     """
     Returns all the resources. No parameter needed.
-    curl -H "Content-type: application/json" -H "Accept: application/json" -i -L  http://localhost:8000/api/items
+    curl -H "Content-type: application/json" -H "Accept: application/json" -i -L  http://localhost:8000/api/keys
     :return: All the elements
     """
     try:
@@ -92,9 +91,13 @@ async def get_all_keys():
         logger.info(f'DB size: {dbsize} - Keys: {all_the_keys}')
         return {"dbsize": dbsize, 'keys': all_the_keys}
     except exceptions.ConnectionError:
-        strError = f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}'
-        logger.info(strError)
-        return {"error": strError}
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
 @router.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
 def path_parameter(item_id: int, price: float):

@@ -71,7 +71,7 @@ Starts the container with `HTTP` only.
 
 ```sh
 docker run -d --rm \
--e REDIS_HOSTNAME='redis.lab' \
+-e REDIS_HOSTNAME=redis.lab \
 -e REDIS_PORT=6379 \
 -e FAKEAPI_INTF=0.0.0.0 \
 -e FAKEAPI_PORT=8000 \
@@ -85,7 +85,7 @@ This tutorial is not about OpenSSL. To use FakeAPI with `HTTPS`, you will need t
 
 ```sh
 docker run -d --rm \
--e REDIS_HOSTNAME='redis.lab' \
+-e REDIS_HOSTNAME=redis.lab \
 -e REDIS_PORT=6379 \
 -e FAKEAPI_INTF=0.0.0.0 \
 -e FAKEAPI_PORT=9443 \
@@ -96,17 +96,12 @@ fakeapi
 ```
 >**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.
 
-If you start multiple servers and give them names like `server[1-n]`, you can remove all the containers with the command:
-```sh
-docker container rm -f $(docker container ls -f name=server -q)
-```
-
 ### Redis
 Start Redis with the following command:
 ```sh
 docker run --name redis.lab --hostname redis.lab -d --rm --network backend redis
 ```
->**Note**: No need to map the Redis port, since it's only accessed by the FakeAPI.
+>**Note**: No need to map the Redis port on the Docker host, since it's only accessed by the FakeAPI. In case you want to expose the port, add `-p 6379:6379` to the command line.
 
 **Optional:** You can start a Redis client for troubleshooting. Note that the hostname is 'redis.lab' because we're in the same network as the server. Don't use 'localhost' as this container is in the same network as the Redis server and Docker's DNS will take care of resolution:
 ```sh
