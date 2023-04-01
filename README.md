@@ -54,7 +54,7 @@ This command builds the Docker image:
 docker build -t fakeapi .
 ```
 
->The image should be `~85Mb`.
+>The image should be `~135Mb`.
 ```sh
 docker image ls fakeapi
 ```

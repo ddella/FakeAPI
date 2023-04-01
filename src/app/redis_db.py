@@ -37,7 +37,7 @@ try:
     else:
         logger.info(f'Key: "{visited_key}" already exist')
 except exceptions.ConnectionError:
-    print(f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}')
+    logger(f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}')
 
 router = APIRouter()
 

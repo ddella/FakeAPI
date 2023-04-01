@@ -86,10 +86,15 @@ async def get_all_keys():
     curl -H "Content-type: application/json" -H "Accept: application/json" -i -L  http://localhost:8000/api/items
     :return: All the elements
     """
-    all_the_keys = redis.keys('*')
-    dbsize = redis.dbsize()
-    logger.info(f'DB size: {dbsize} - Keys: {all_the_keys}')
-    return {"dbsize": dbsize, 'keys': all_the_keys}
+    try:
+        all_the_keys = redis.keys('*')
+        dbsize = redis.dbsize()
+        logger.info(f'DB size: {dbsize} - Keys: {all_the_keys}')
+        return {"dbsize": dbsize, 'keys': all_the_keys}
+    except exceptions.ConnectionError:
+        strError = f'Connection failed with Redis database {REDIS_HOSTNAME} at port {REDIS_PORT}'
+        logger.info(strError)
+        return {"error": strError}
 
 @router.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
 def path_parameter(item_id: int, price: float):
