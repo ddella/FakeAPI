@@ -5,7 +5,7 @@
 
 FakeAPI is a Python script that implements most of the REST API methods. Do not use it in a production deployment. The script does almost no verifications, to keep the code small. I build it to learn more about the concept of REST API and also to test some API Gateways, load balancer and reverse proxy, like [Nginx API Gateway](https://www.nginx.com/learn/api-gateway/) to name a few.
 
-FakeAPI is based the [FastAPI](https://fastapi.tiangolo.com/) framework. I'm using [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server and [Pydantic](https://docs.pydantic.dev/) for data validation.
+FakeAPI is based the [FastAPI](https://fastapi.tiangolo.com/) framework. I'm using [Uvicorn](https://www.uvicorn.org/) as the [ASGI](https://asgi.readthedocs.io/en/latest/) web server and [Pydantic](https://docs.pydantic.dev/) for data validation. All the data is saved in a Redis database.
 
 >FakeAPI implements only `JSON` objects and requires **Python 3.10+**
 
@@ -62,16 +62,17 @@ docker image ls fakeapi
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
->**Note**: This project is about REST API and not databases. The data is saved in a simple `json` file and is mapped outside the container on the Docker host. Multiple containers can use the same file but at some point disaster is not too far away 😀 In real life, we should have used a database, like [MongoDB](https://www.mongodb.com/).   
+Start the fakeAPI and Redis servers in a custom network, to have Docker's DNS for name resolution.  
 
 Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
 
 ## Run the project with HTTP
-The data will be located on the Docker host in the directory you start the container.
+Starts the container with `HTTP` only.
 
 ```sh
-docker run -d --rm -v $PWD:/usr/src/data \
--e FAKEAPI_DATABASE=/usr/src/data/data.json \
+docker run -d --rm \
+-e REDIS_HOSTNAME='redis.lab' \
+-e REDIS_PORT=6379 \
 -e FAKEAPI_INTF=0.0.0.0 \
 -e FAKEAPI_PORT=8000 \
 --name server1 --hostname server1 --network backend -p8000:8000 \
@@ -80,10 +81,10 @@ fakeapi
 >If you prefer Docker Compose, see [FakeAPI YAML](FakeAPI_YAML.md)
 
 ## Run the project with HTTPS
-This tutorial is not about OpenSSL. To use FakeAPI with HTTPS, you will need to generate a private key and a certificate. Check my tutorial on [OpenSSL](https://github.com/ddella/OpenSSL).
+This tutorial is not about OpenSSL. To use FakeAPI with `HTTPS`, you will need to generate a private key and a certificate. Check my tutorial on [OpenSSL](https://github.com/ddella/OpenSSL). I've included a private key and a self signed certificate.
 
 ```sh
-docker run -d --rm -v $PWD:/usr/src/data \
+docker run -d --rm \
 -e REDIS_HOSTNAME='redis.lab' \
 -e REDIS_PORT=6379 \
 -e FAKEAPI_INTF=0.0.0.0 \
@@ -103,9 +104,14 @@ docker container rm -f $(docker container ls -f name=server -q)
 ### Redis
 Start Redis with the following command:
 ```sh
-docker run --name redis --hostname redis -d --rm --network backend redis
+docker run --name redis.lab --hostname redis.lab -d --rm --network backend redis
 ```
 >**Note**: No need to map the Redis port, since it's only accessed by the FakeAPI.
+
+**Optional:** You can start a Redis client for troubleshooting. Note that the hostname is 'redis.lab' because we're in the same network as the server. Don't use 'localhost' as this container is in the same network as the Redis server and Docker's DNS will take care of resolution:
+```sh
+docker run -it --rm --network backend redis redis-cli -h redis.lab
+```
 
 ## Custom network (optional)
 FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I encourage you to run your containers in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
@@ -115,15 +121,6 @@ docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Shell access
-Get shell access to the container with the directory `/usr/src/data`, inside the container,  mounted on the current directory of the Docker host.
-
-```sh
-docker run -it --rm --name fakeapi --hostname fakeapi -v $PWD:/usr/src/data fakeapi /bin/sh
-```
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- Docs -->
 ## Docs URLs
 You can check the swagger documentation made available at `http://localhost:8000/docs`. This will list all the methods with it's associated endpoints.
 
