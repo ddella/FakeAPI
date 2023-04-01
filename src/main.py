@@ -1,4 +1,16 @@
 # main.py
+"""
+Start a Redis server in a custom network. We need Docker's DNS for name resolution
+    % docker run --name redis.lab --hostname redis.lab -it --rm --network backend -p 6379:6379 redis --loglevel debug
+
+Start a Redis client for troubleshooting. Note that the hostname is 'redis.lab' because we're in the same network
+as the server. Don't use 'localhost' as this container is in the same network as the Redis server and Docker's
+DNS will take care of resolution:
+    % docker run -it --rm --network backend redis redis-cli -h redis.lab
+
+Example of queries within the Redis client:
+    redis.lab:6379> HGETALL item:100
+"""
 import uvicorn
 import logging
 import platform
@@ -14,7 +26,7 @@ import app.post as post         # POST method
 import app.put as put           # PUT method
 import app.trace as trace       # TRACE method
 import jwtauth.users as users   # module for users
-import app.red as redis         # GET method with Redis database
+import app.redis_db as redis    # GET method with Redis database
 
 if __name__ == "__main__":
     # logger config

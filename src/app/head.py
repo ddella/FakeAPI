@@ -1,6 +1,5 @@
 # app/head.py
 from fastapi import APIRouter, Request
-import app.database as db
 
 router = APIRouter()
 
@@ -15,8 +14,7 @@ async def head(request: Request) -> dict:
     curl -I -H "Content-type: application/json" -H "Accept: application/json" -i -L "http://localhost:8000"
     :return: Only the header of a query
     """
-    items = db.readData()
-    return {"message": "Root of Fake REST API", "method": request.method, "items": items}
+    return {"message": "Root of Fake REST API", "method": request.method}
 
 if __name__ == "__main__":
     import uvicorn

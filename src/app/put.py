@@ -17,7 +17,11 @@ successful completion of the request.
 """
 from fastapi import APIRouter, HTTPException, status
 from app.definitions import Item
-import app.database as db
+from app.redis_db import redis
+from app.definitions import REDIS_HOSTNAME, REDIS_PORT
+from fastapi.encoders import jsonable_encoder
+from redis import exceptions
+from app.logs import logger
 
 router = APIRouter()
 
@@ -39,17 +43,29 @@ def update_item(updated_item: Item) -> dict:
     :param updated_item: class Item(BaseModel):
     :return: The updated item
     """
-    items = db.readData()
-    idx_item_to_update = [i for i, x in enumerate(items) if x.id == updated_item.id]
-    if idx_item_to_update:
-        items.pop(idx_item_to_update[0])
-        items.insert(idx_item_to_update[0], updated_item)
-        db.writeData(items)
+    # Hash HEXISTS
+    key = 'item:' + str(updated_item.id)
+    try:
+        result = redis.hexists(key, 'id')
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if result:
+        # Hash Multiple Set
+        redis.hset(key, mapping=jsonable_encoder(updated_item))
+        logger.info(f'Full update - {jsonable_encoder(updated_item)}')
         return dict(updated_item)
 
     strError = f"Item with ID {updated_item.id} doesn't exists, full update failed"
+    logger.info(f'{strError}')
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_400_BAD_REQUEST,
         detail=strError,
         headers={"X-Fake-REST-API": strError},
     )

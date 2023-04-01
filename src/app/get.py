@@ -14,12 +14,50 @@ Type of parameter(s) passed with the API:
     4. Content body parameter(s)
 """
 
-from fastapi import APIRouter, Request, status, HTTPException
+from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import RedirectResponse
 from app.definitions import IDPrice
-import app.database as db
+from app.redis_db import redis
+from app.definitions import REDIS_HOSTNAME, REDIS_PORT
+from redis import exceptions
+from app.logs import logger
 
 router = APIRouter()
+
+def get_id_price(item_id, price) -> dict:
+    # Hash GETALL
+    key = 'item:' + str(item_id)
+    try:
+        result = redis.hgetall(key)
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if not result:
+        strError = f"Item with ID {item_id} was not found"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if int(result.get('id')) == item_id and float(result.get('price')) == price:
+        return {"Item": result}
+    else:
+        strError = f"Item with ID {item_id} and price {price:.2f}$ was not found"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
 
 @router.get("/", response_class=RedirectResponse, include_in_schema=False)
 async def docs():
@@ -40,20 +78,21 @@ async def docs():
 #     response.headers.update(headers)
 #     return
 
-@router.get("/api/items", tags=["get"])
-async def get_all_items(request: Request) -> dict:
+@router.get("/api/keys", tags=["get"])
+async def get_all_keys():
+    # async def get_all_keys(request: Request) -> dict:
     """
     Returns all the resources. No parameter needed.
-
     curl -H "Content-type: application/json" -H "Accept: application/json" -i -L  http://localhost:8000/api/items
-
     :return: All the elements
     """
-    items = db.readData()
-    return {"message": "Root of Fake REST API", "method": request.method, "items": items}
+    all_the_keys = redis.keys('*')
+    dbsize = redis.dbsize()
+    logger.info(f'DB size: {dbsize} - Keys: {all_the_keys}')
+    return {"dbsize": dbsize, 'keys': all_the_keys}
 
 @router.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
-def path_parameter(item_id: int, price: float) -> dict:
+def path_parameter(item_id: int, price: float):
     """
     Path parameters help scope the API call down to a single resource, which means you don’t have to build a body for
     something as simple as a resource finder.
@@ -63,28 +102,17 @@ def path_parameter(item_id: int, price: float) -> dict:
     The value of the path parameter 'item_id' will be passed to the function path_parameter()
     as the argument 'item_id'. The name of the path parameter MUST be identical to the function argument.
 
-    curl -H "Content-type: application/json" \
-    -H "Accept: application/json" -i -L "http://127.0.0.1:8000/api/item/price/{item_id}/{price}"
+    Example with curl:
+        curl -H "Content-type: application/json" \
+        -H "Accept: application/json" -i -L "http://127.0.0.1:8000/api/item/price/{item_id}/{price}"
     :param item_id: The ID of the resource we want to retreive
     :param price: The price of the resource we want to retreive
     :return:
     """
-    items = db.readData()
-    print(f'path_parameter -> ID={item_id} - Price:{price}')
-    record = [d for d in items if d.id == item_id]
-    if record and record[0].price == price:
-        # record is a list with only one element, if ID is unique 😉
-        return {"Item": record[0]}
-    else:
-        strError = f"Item with ID {item_id} and price {price} was not found"
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=strError,
-            headers={"X-Fake-REST-API": strError},
-        )
+    return get_id_price(item_id, price)
 
 @router.get("/api/item/0/price", tags=["query_parameter"])
-def query_parameter(item_id: int, price: float) -> dict:
+def query_parameter(item_id: int, price: float):
     """
     Query parameters are optional. In FastAPI, function parameters that aren’t declared as part of the path parameters
     are automatically interpreted as query parameters.
@@ -106,28 +134,17 @@ def query_parameter(item_id: int, price: float) -> dict:
     as the argument 'price' and 'str_item_id'. The name of the path parameter MUST be identical to the function
     argument.
 
-    curl -H "Content-type: application/json" \
-    -H "Accept: application/json" -i -L "http://127.0.0.1:8000/api/item/0/price?price=1.99&item_id=100"
+    Example with curl:
+        curl -H "Content-type: application/json" \
+        -H "Accept: application/json" -i -L "http://127.0.0.1:8000/api/item/0/price?price=1.99&item_id=100"
     :param price:
     :param item_id:
     :return:
     """
-    items = db.readData()
-    print(f'query_parameter -> ID={item_id} - Price:{price}')
-    record = [d for d in items if d.id == item_id]
-    if record and record[0].price == price:
-        # record is a list with only one element, if ID is unique 😉
-        return {"Item": record[0]}
-
-    strError = f"Item with ID {item_id} and price {price} was not found"
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=strError,
-        headers={"X-Fake-REST-API": strError},
-    )
+    return get_id_price(item_id, price)
 
 @router.get("/api/item/1/price", status_code=status.HTTP_200_OK, tags=["content_parameter"])
-async def content_parameter(itemPrice: IDPrice) -> dict:
+async def content_parameter(itemPrice: IDPrice):
     """
     In a request body, data sent by the client to your API in the body of the request. To declare one in FastAPI,
     we can use Pydantic models. In this example we want to find a resource with a specific ID and price.
@@ -138,19 +155,7 @@ async def content_parameter(itemPrice: IDPrice) -> dict:
     :param itemPrice: Item ID and price of item we want to retreive
     :return: The item or error 404 if not found
     """
-    items = db.readData()
-    print(f'Content -> ID={itemPrice.item_id} - Price: {itemPrice.price}')
-    record = [d for d in items if d.id == itemPrice.item_id]
-    if record and record[0].price == itemPrice.price:
-        # record is a list with only one element, if ID is unique 😉
-        return {"Item": record[0]}
-
-    strError = f"Item with ID {itemPrice.item_id} and price {itemPrice.price} was not found"
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=strError,
-        headers={"X-Fake-REST-API": strError},
-    )
+    return get_id_price(itemPrice.item_id, itemPrice.price)
 
 if __name__ == "__main__":
     import uvicorn

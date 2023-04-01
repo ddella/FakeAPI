@@ -11,7 +11,11 @@ In this case, either HTTP response code 200 (OK) or 204 (No Content) is the appr
 """
 from fastapi import APIRouter, HTTPException, status
 from app.definitions import Item
-import app.database as db
+from app.redis_db import redis
+from app.definitions import REDIS_HOSTNAME, REDIS_PORT
+from fastapi.encoders import jsonable_encoder
+from redis import exceptions
+from app.logs import logger
 
 router = APIRouter()
 
@@ -31,18 +35,30 @@ def add_item(item: Item) -> dict:
     :param item:
     :return: The data received in the body
     """
-    items = db.readData()
-    record = [d for d in items if d.id == item.id]
-    if record:
-        # record is a list with only one element, if ID is unique 😉
-        strError = f"ID {item.id} already exists, adding item failed"
+    # Hash GET
+    key = 'item:' + str(item.id)
+    try:
+        result = redis.hget(key, 'id')
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
         raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=strError,
             headers={"X-Fake-REST-API": strError},
         )
-    items.append(item)
-    db.writeData(items)
+
+    if result:
+        strError = f"ID {item.id} already exists, adding item failed"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+    # Hash Multiple Set
+    redis.hset(key, mapping=jsonable_encoder(item))
+    logger.info(f'POST: {item}')
     return dict(item)
 
 

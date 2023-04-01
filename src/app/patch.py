@@ -17,7 +17,10 @@ successful completion of the request.
 """
 from fastapi import APIRouter, HTTPException, status
 from app.definitions import IDPrice, IDQuantity
-import app.database as db
+from app.redis_db import redis
+from app.definitions import REDIS_HOSTNAME, REDIS_PORT
+from redis import exceptions
+from app.logs import logger
 
 router = APIRouter()
 
@@ -40,16 +43,47 @@ def updatePrice(update_price: IDPrice) -> dict:
     :param update_price: class IDPrice(BaseModel)
     :return: The updated item
     """
-    items = db.readData()
-    idx_item_to_update = [i for i, x in enumerate(items) if x.id == update_price.item_id]
-    if idx_item_to_update:
-        items[idx_item_to_update[0]].price = update_price.price
-        db.writeData(items)
-        return dict(items[idx_item_to_update[0]])
+    # Hash HEXISTS
+    key = 'item:' + str(update_price.item_id)
+    try:
+        result = redis.hexists(key, 'id')
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
-    strError = f"Item with ID {update_price.item_id} doesn't exists, price update failed"
+    if not result:
+        strError = f"Item with ID {update_price.item_id} doesn't exists, price update failed"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    try:
+        result = redis.hset(key, 'price', update_price.price)
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if result == 0:
+        return {"detail": "update successful", "Item": update_price.item_id, "New Price": update_price.price}
+
+    # This should never happen
+    strError = f"ERROR: Field price was added for ID {update_price.item_id}"
+    logger.info(f'{strError}')
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_201_CREATED,
         detail=strError,
         headers={"X-Fake-REST-API": strError},
     )
@@ -73,16 +107,47 @@ def updateQuantity(update_quantity: IDQuantity) -> dict:
     :param update_quantity: class IDPrice(BaseModel)
     :return: The updated item
     """
-    items = db.readData()
-    idx_item_to_update = [i for i, x in enumerate(items) if x.id == update_quantity.item_id]
-    if idx_item_to_update:
-        items[idx_item_to_update[0]].quantity = update_quantity.quantity
-        db.writeData(items)
-        return dict(items[idx_item_to_update[0]])
+    # Hash SET
+    key = 'item:' + str(update_quantity.item_id)
+    try:
+        result = redis.hexists(key, 'id')
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
 
-    strError = f"Item with ID {update_quantity.item_id} doesn't exists, quantity update failed"
+    if not result:
+        strError = f"Item with ID {update_quantity.item_id} doesn't exists, quantity update failed"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    try:
+        result = redis.hset(key, 'quantity', update_quantity.quantity)
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if result == 0:
+        return {"detail": "update successful", "Item": update_quantity.item_id, "New Price": update_quantity.quantity}
+
+    # This should never happen
+    strError = f"ERROR: Field price was added for ID {update_quantity.item_id}"
+    logger.info(f'{strError}')
     raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_201_CREATED,
         detail=strError,
         headers={"X-Fake-REST-API": strError},
     )

@@ -2,7 +2,10 @@
 # https://fastapi.tiangolo.com/it/tutorial/bigger-applications/
 from fastapi import status, HTTPException, APIRouter
 from app.definitions import ItemID
-import app.database as db
+from app.redis_db import redis
+from app.definitions import REDIS_HOSTNAME, REDIS_PORT
+from redis import exceptions
+from app.logs import logger
 
 router = APIRouter()
 
@@ -19,14 +22,24 @@ async def deleteItem(item_id: ItemID) -> dict:
     :param item_id: ID of item to delete
     :return: Deleted item or error 404 if not found
     """
-    items = db.readData()
-    idx_item_to_remove = [i for i, x in enumerate(items) if x.id == item_id.item_id]
-    if idx_item_to_remove:
-        bad_item = items.pop(idx_item_to_remove[0])
-        db.writeData(items)
-        return dict(bad_item)
+    key = 'item:' + str(item_id.item_id)
+    try:
+        result = redis.delete(key)
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if result == 1:
+        logger.info(f'delete successful for item {item_id.item_id}')
+        return {"detail": "delete successful", "Item": item_id.item_id}
 
     strError = f"Item with ID {item_id.item_id} doesn't exists, delete failed"
+    logger.info(f'{strError}')
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=strError,

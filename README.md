@@ -142,8 +142,8 @@ This tutorial is not about OpenSSL. To use FakeAPI with HTTPS, you will need to 
 
 ```sh
 docker run -d --rm -v $PWD:/usr/src/data \
--e FAKEAPI_DATABASE=/usr/src/data/data.json \
--e FAKEAPI_USR_DATABASE=/usr/src/data/users.json \
+-e REDIS_HOSTNAME='redis.lab' \
+-e REDIS_PORT=6379 \
 -e FAKEAPI_INTF=0.0.0.0 \
 -e FAKEAPI_PORT=9443 \
 -e FAKEAPI_SERVER_KEY=server-key.pem \
