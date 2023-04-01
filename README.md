@@ -19,64 +19,6 @@ REST API methods implemented in FakeAPI are:
 * **HTTP PATCH** to make a partial update (only one field)
 * **HTTP TRACE** server reply with the header received in the body of the 
 
-# Python Virtual Environment Setup (Optionnal)
-This section is optionnal. Unless you want to play with the source code, you can skip to <a href="#docker-container">How to use this image</a> section.
-
-1. Start by cloning the project and change directory where the source reside:
-
-```sh
-gh repo clone ddella/FakeAPI
-cd FakeAPI/src
-```
-
-2. Create and activate a virtual environment:
-
-```sh
-python3.11 -m venv .venv
-source .venv/bin/activate
-export PYTHONPATH=$PWD
-```
->To deactivate the environment, just type `deactivate` in the shell or simply close it.
-
->Don't forget to export `PYTHONPATH`.
-
-3. Install the necessary modules (make sure you have the latest pip installed):
-```sh
-pip3 install --upgrade pip
-pip3 install fastapi uvicorn pydantic pydantic[email]
-```
->**Note**: If you get the following error message, it has nothing to do with Python, Pydantic, or your virtual environment. It's a `zsh` shell error.
-
-    (.venv) user@MacBook src % pip3 install pydantic[email]
-    zsh: no matches found: pydantic[email]
-
-To avoid this, you can simply put the argument in quotes like this:
-```sh
-pip install 'pydantic[email]'
-```
-
-4. Create the `requirements.txt` file needed to build the image: 
-```sh
-pip3 freeze > requirements.txt
-```
-
-5. Make sure you're using the right Python interpreter, the one in the virtual environment:
-```sh
-(.venv) % which python3
-```
-
-The result should be something similar to this (your milage may vary 😀):
-```
-/Users/username/.../.venv/bin/python3
-```
-
-6. Start the app with the command:
-```sh
-python3 main.py
-```
-
-<a name="docker-container"></a>
-
 # How to use this image (This is for educational **only**!)
 ## Build the Docker image
 
@@ -209,6 +151,11 @@ This will send a `GET` request to the server and it will return all the object i
     {"message":"Root of Fake REST API","method":"GET","items":[{"id":100,"description":"This is a description","price":99.99,"quantity":100,"category":"clothes"},{"id":101,"description":"Jeans","price":39.99,"quantity":100,"category":"clothes"},{"id":102,"description":"Apple","price":0.5,"quantity":150,"category":"grocery"},{"id":103,"description":"Radio AM/FM","price":25.49,"quantity":5,"category":"consumables"},{"id":1004,"description":"This is a description","price":99.99,"quantity":100,"category":"clothes"},{"id":104,"description":"This is a description","price":99.99,"quantity":100,"category":"clothes"}]}
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Development
+If you want to plya with the source code, you can read the following tutorial to setup a Python development environment
+
+* [development](dev.md)
 
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
