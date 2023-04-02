@@ -31,7 +31,7 @@ Use the command to clone the project on your local drive:
 gh repo clone ddella/FakeAPI
 ```
 
-The prefered method to clone the project is with `gh` but if you can't use it, use `cURL` to download it to your local drive:
+The prefered method to clone the project is with `gh` but if you can't use it, use `cURL` to download it to your local drive and unzip it:
 ```sh
 curl -L -o fakeapi.zip https://github.com/ddella/FakeAPI/archive/refs/heads/main.zip
 unzip fakeapi.zip
@@ -40,9 +40,7 @@ cd FakeAPI-main
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Build the Docker image
-You need to build the Docker image to run containers. No matter the method used to start the container:
-- you need to build the image
-- it's the same image no matter what method is used to start it
+You need to build the Docker image to run containers. No matter the method used to start the containers. Whether you use the `docker` command line or a `yaml` file to start a container, the Docker image is the same.
 
 This is the `Dockerfile` needed to build the image:
 ```Dockerfile
@@ -80,7 +78,7 @@ Use this command to check that the image is on your local repo:
 docker image ls fakeapi:2.0
 ```
 
->Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`. This is to exclude files unneeded from the final image:
+>Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`. This is to exclude files unneeded in the final image:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -128,9 +126,9 @@ This will send a `GET` request to the server and it will return all the keys in 
 ## Development (Optionnal)
 **If you goal is only to run the containers, skip this section**
 
-If you want to play with the source code, you can read the following tutorial to setup a Python development environment
+If you want to play with the source code, you can read the following tutorial to setup a Python virtual development environment
 
-* [development](dev.md)
+* [development](venv.md)
 
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
