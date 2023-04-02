@@ -44,14 +44,14 @@ services:
     domainname: backend.com
     image: fakeapi
     ports:
-      - "9445:9445"
+      - "8000:8000"
     deploy:
       replicas: 6
     environment:
       - REDIS_HOSTNAME=redis.lab
       - REDIS_PORT=6379
       - FAKEAPI_INTF=0.0.0.0
-      - FAKEAPI_PORT=9445
+      - FAKEAPI_PORT=8000
       - FAKEAPI_SERVER_KEY=server-key.pem
       - FAKEAPI_SERVER_CRT=server-crt.pem
     networks:
@@ -72,6 +72,14 @@ Somme commands to check the Swarm stack:
 docker stack ls
 docker stack ps fakeapi
 docker stack services fakeapi
+```
+
+<p align="left">(<a href="README.md">back to the main page</a>)</p>
+
+## Redis Client (*Optional*)
+You can start a Redis client for troubleshooting the Redis container. Note that the hostname, on the command line, to access the Redis server is `redis.lab` because we're in the same network as the Redis server.
+```sh
+docker run -it --rm --network backend --name redis.cli redis redis-cli -h redis.lab
 ```
 
 <p align="left">(<a href="README.md">back to the main page</a>)</p>

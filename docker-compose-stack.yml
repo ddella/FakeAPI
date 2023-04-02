@@ -16,14 +16,14 @@ services:
     domainname: backend.com
     image: fakeapi
     ports:
-      - "9445:9445"
+      - "8000:8000"
     deploy:
       replicas: 6
     environment:
       - REDIS_HOSTNAME=redis.lab
       - REDIS_PORT=6379
       - FAKEAPI_INTF=0.0.0.0
-      - FAKEAPI_PORT=9445
+      - FAKEAPI_PORT=8000
       - FAKEAPI_SERVER_KEY=server-key.pem
       - FAKEAPI_SERVER_CRT=server-crt.pem
     networks:

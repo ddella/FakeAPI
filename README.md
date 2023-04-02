@@ -37,9 +37,12 @@ curl -L -o fakeapi.zip https://github.com/ddella/FakeAPI/archive/refs/heads/main
 unzip fakeapi.zip
 cd FakeAPI-main
 ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Build the Docker image
-You need to build the Docker image to run containers.
+You need to build the Docker image to run containers. No matter the method used to start the container:
+- you need to build the image
+- it's the same image no matter what method is used to start it
 
 This is the `Dockerfile` needed to build the image:
 ```Dockerfile
@@ -70,36 +73,32 @@ Use this command to build the Docker image:
 docker build -t fakeapi:2.0 .
 ```
 
->The image should be `~90Mb`.
+>The final image should be `~90Mb`.
 
-Use this command to check that the image is in your local repo:
+Use this command to check that the image is on your local repo:
 ```sh
 docker image ls fakeapi:2.0
 ```
 
-Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`. This is to exclude files from the final image:
-
-    __pycache__
-    **/__pycache__
-    .DS_Store
-    **/.DS_Store
-    **/venv
+>Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`. This is to exclude files unneeded from the final image:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Run the project
 The FakeAPI project is meant to run as Docker containers. You will need at least one FakeAPI container and a Redis container. Below are three (3) different ways to start the containers. You will need at least one FakeAPI server and one Redis server.
 
-1. Shows how to run the containers, FakeAPI and Redis, with the `docker run` command [standalone](docker.md)
-2. Shows how to run the containers, FakeAPI and Redis, with `docker Compose` and a `yaml` file [Docker Compose](docker_compose.md)
-3. Shows how to run the containers, FakeAPI and Redis, as a Stack in a Docker Swarm [Docker Swarm Stack](swarm_stack.md)
+If you don't have a Docker Swarm, my prefered way is with **Docker Compose**. It will start a FakeAPI and a Redis container with one small command.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+1. Shows how to run the containers, FakeAPI and Redis, with the `docker run` command [standalone](docker.md)
+2. Shows how to run the containers, FakeAPI and Redis, with `docker compose` and a `yaml` file [Docker Compose](docker_compose.md)
+3. Shows how to run the containers, FakeAPI and Redis, as a Stack in a Docker Swarm [Docker Swarm Stack](swarm_stack.md)
 
 ## Docs URLs
 You can check the swagger documentation made available at `http://localhost:8000/docs`. This will list all the methods with it's associated endpoints.
 
 >**Notes:** Use either `HTTP` or `HTTPS` depending if you supply a certificate and private key when starting the FakeAPI container.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ![Documentation](images/docs.jpg)
 
