@@ -10,3 +10,4 @@ blank-README.md
 *.docx
 *.xlsx
 build.sh
+src/tempo.py
