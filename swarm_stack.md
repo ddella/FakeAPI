@@ -22,6 +22,8 @@ docker stack deploy -c docker-compose-stack.yml fakeapi
 docker stack rm fakeapi
 ```
 
+>**Note:** Make sure that the Docker image you built previously is local on **EVERY** Swarm node. A node doesn't retreive the image from the manager node.
+
 ## Docker Swarm stack
 The `docker-compose-stack.yml` file to start multiple copies of FakeAPI with one Redis database on a Docker Swarm.
 
@@ -32,7 +34,6 @@ The `docker-compose-stack.yml` file to start multiple copies of FakeAPI with one
 # Create the network, on the manager node **ONLY**
 #   docker network create -d overlay --subnet=172.21.5.0/24 \
 #   --gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
-version: "3.9"
 networks:
    backend:
       name: ovrl_stack_fakeapi
