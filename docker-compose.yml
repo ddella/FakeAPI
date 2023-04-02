@@ -24,6 +24,8 @@ services:
     domainname: backend.com
     networks:
       backend:
+    depends_on:
+      - redis
 
   redis:
     image: redis:alpine

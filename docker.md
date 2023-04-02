@@ -3,6 +3,26 @@
 # Run a standalone FakeAPI and Redis container
 Start the FakeAPI and Redis containers in a custom network, to have Docker's DNS for name resolution. In this example. the network is `backend`. Use an appropriate `hostname` if you start multiple containers. The logs and page visited will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
 
+Start the Redis container before starting the FakeAPI container. The latter one tries to establis a connection with the database.
+
+## Redis
+To start a Redis container running in the background, use the following command:
+```sh
+docker run --name redis.lab --hostname redis.lab -d --rm --network backend -p 6379:6379 redis
+```
+
+To start a Redis container with interactive shell and many rarely useful info, use the following command:
+```sh
+docker run --name redis.lab --hostname redis.lab -it --rm --network backend -p 6379:6379 redis --loglevel verbose
+```
+
+>**Note**: You don't need to map the Redis port on the Docker host. The Redis server is only accessed by the FakeAPI containers. In case you want to expose the Redis port to the outside world, add `-p 6379:6379` to the command line.
+
+**Optional:** You can start a Redis client for troubleshooting the Redis container. Note that the hostname, on the command line, to access the Redis server is `redis.lab` because we're in the same network as the Redis server.
+```sh
+docker run -it --rm --network backend --name redis.cli redis redis-cli -h redis.lab
+```
+
 ## Run the project with HTTP
 Starts the container with `HTTP` only.
 
@@ -33,24 +53,6 @@ fakeapi:2.0
 >**Note**: Don't forget to trust your CA in your trusted store if you decide to your own CA. On macOS, this is in KeyChain.
 
 <p align="left">(<a href="README.md">back to the main page</a>)</p>
-
-## Redis
-To start a Redis container running in the background, use the following command:
-```sh
-docker run --name redis.lab --hostname redis.lab -d --rm --network backend -p 6379:6379 redis
-```
-
-To start a Redis container with interactive shell and many rarely useful info, use the following command:
-```sh
-docker run --name redis.lab --hostname redis.lab -it --rm --network backend -p 6379:6379 redis --loglevel verbose
-```
-
->**Note**: You don't need to map the Redis port on the Docker host. The Redis server is only accessed by the FakeAPI containers. In case you want to expose the Redis port to the outside world, add `-p 6379:6379` to the command line.
-
-**Optional:** You can start a Redis client for troubleshooting the Redis container. Note that the hostname, on the command line, to access the Redis server is `redis.lab` because we're in the same network as the Redis server.
-```sh
-docker run -it --rm --network backend --name redis.cli redis redis-cli -h redis.lab
-```
 
 ## Custom network
 FakeAPI runs on a custom Docker network to get the added value of Docker DNS server. The following command was used to create the `backend` network use througth this example.

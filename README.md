@@ -90,8 +90,8 @@ The FakeAPI project is meant to run as Docker containers. You will need at least
 If you don't have a Docker Swarm, my prefered way is with **Docker Compose**. It will start a FakeAPI and a Redis container with one small command.
 
 1. Shows how to run the containers, FakeAPI and Redis, with the `docker run` command [standalone](docker.md)
-2. Shows how to run the containers, FakeAPI and Redis, with `docker compose` and a `yaml` file [Docker Compose](docker_compose.md)
-3. Shows how to run the containers, FakeAPI and Redis, as a Stack in a Docker Swarm [Docker Swarm Stack](swarm_stack.md)
+2. Shows how to run the containers, FakeAPI and Redis, with `docker compose` and a `yaml` file [Docker Compose](docker-compose.md)
+3. Shows how to run the containers, FakeAPI and Redis, as a Stack in a Docker Swarm [Docker Swarm Stack](docker-compose-stack.md)
 
 ## Docs URLs
 You can check the swagger documentation made available at `http://localhost:8000/docs`. This will list all the methods with it's associated endpoints.

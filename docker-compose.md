@@ -39,6 +39,8 @@ networks:
 services:
   fakeapi:
     image: fakeapi:2.0
+    deploy:
+      replicas: 1
     ports:
       - "8000:8000"
     restart: unless-stopped
@@ -54,6 +56,8 @@ services:
     domainname: backend.com
     networks:
       backend:
+    depends_on:
+      - redis
 
   redis:
     image: redis:alpine
@@ -65,15 +69,39 @@ services:
     networks:
        backend:
 ```
-## Logging
-In case you run into problems, you can start logging with the command:
+## Useful commands
+Command to list running compose projects:
 ```sh
-docker logs -f server1
+docker compose ls
 ```
+
+Command to display the running processes for the project:
+```sh
+docker compose top fakeapi redis
+```
+
+Command to list containers for the project:
+```sh
+docker compose ps fakeapi redis
+```
+
+Command to list the images used by the created containers for the project:
+```sh
+docker compose images fakeapi redis
+```
+
+## Logging
+In case you run into problems, you can start logging the compose project with the command:
+```sh
+docker compose logs -f fakeapi redis
+```
+
+You get the logs from the FakeAPI and Redis container.
+
 <p align="left">(<a href="README.md">back to the main page</a>)</p>
 
 ## Redis Client (*Optional*)
-You can start a Redis client for troubleshooting the Redis container. Note that the hostname, on the command line, to access the Redis server is `redis.lab` because we're in the same network as the Redis server.
+You can start a Redis client for troubleshooting the Redis container acting as the Redis database server. Note that the hostname, on the command line, to access the Redis server is `redis.lab` because we're in the same network as the Redis server.
 ```sh
 docker run -it --rm --network backend --name redis.cli redis redis-cli -h redis.lab
 ```
