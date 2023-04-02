@@ -71,11 +71,13 @@ docker build -t fakeapi:2.0 .
 ```
 
 >The image should be `~90Mb`.
+
+Use this command to check that the image is in your local repo:
 ```sh
 docker image ls fakeapi:2.0
 ```
 
-Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`. This is to exclude files from the image:
+Make sure you have the file `.dockerignore` in the same directory as the `Dockerfile`. This is to exclude files from the final image:
 
     __pycache__
     **/__pycache__
@@ -91,6 +93,8 @@ The FakeAPI project is meant to run as Docker containers. You will need at least
 1. Shows how to run the containers, FakeAPI and Redis, with the `docker run` command [standalone](docker.md)
 2. Shows how to run the containers, FakeAPI and Redis, with `docker Compose` and a `yaml` file [Docker Compose](docker_compose.md)
 3. Shows how to run the containers, FakeAPI and Redis, as a Stack in a Docker Swarm [Docker Swarm Stack](swarm_stack.md)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Docs URLs
 You can check the swagger documentation made available at `http://localhost:8000/docs`. This will list all the methods with it's associated endpoints.
@@ -122,7 +126,9 @@ This will send a `GET` request to the server and it will return all the keys in 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Development
+## Development (Optionnal)
+**If you goal is only to run the containers, skip this section**
+
 If you want to play with the source code, you can read the following tutorial to setup a Python development environment
 
 * [development](dev.md)
