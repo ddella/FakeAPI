@@ -42,7 +42,7 @@ services:
   fakeapi:
     hostname: "{{.Service.Name}}-{{.Node.ID}}"
     domainname: backend.com
-    image: fakeapi
+    image: fakeapi:2.0
     ports:
       - "8000:8000"
     deploy:
