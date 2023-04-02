@@ -2,7 +2,6 @@
 **/.DS_Store
 **/.venv
 **/__pycache__
-*.txt
 .gitignore.swp
 .env
 00_Readme.txt

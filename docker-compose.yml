@@ -1,12 +1,15 @@
 # docker-compose.yml
 # Start the container(s): docker compose -f docker-compose.yml --project-name fakeapi up -d
 # Stop the container(s): docker compose rm -f -s fakeapi redis
+version: "3.9"
 networks:
    backend:
       name: backend
 services:
   fakeapi:
     image: fakeapi:2.0
+    deploy:
+      replicas: 1
     ports:
       - "8000:8000"
     restart: unless-stopped
@@ -27,7 +30,8 @@ services:
     image: redis:alpine
     deploy:
       replicas: 1
-    hostname: redis.lab
     container_name: redis.lab
+    hostname: redis.lab
+    domainname: backend.com
     networks:
        backend:

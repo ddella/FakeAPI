@@ -1,18 +1,28 @@
 # Docker Compose for the FakeAPI container
+Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a `YAML` file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration.
+
+Using Compose is essentially a three-step process:
+
+1. Define your app’s environment with a `Dockerfile` so it can be reproduced anywhere. (refer to the main page to build the image)
+2. Define the services that make up your app in `docker-compose.yml` so they can be run together in an isolated environment.
+3. Run docker compose up and the Docker compose command starts and runs your entire app.
 
 ## Docker Compose commands to start the FakeAPI Server
 This is the `yaml` file to run the FakeAPI Server detached.
 
-1. To start the FakeAPI server, just type the following command:
+1. To start the FakeAPI environment, just type the following command:
 
 ```sh
 docker compose -f docker-compose.yml --project-name fakeapi up -d
 ```
+>This will start one FakeAPI and one Redis container
+
 2. To stop the FakeAPI and Redis servers, just type the following command:
 
 ```sh
 docker compose rm -f -s fakeapi redis
 ```
+>This will stop both containers that were started above
 
 ## YAML file to start the FakeAPI Server
 The `docker-compose.yml` file:
@@ -21,6 +31,7 @@ The `docker-compose.yml` file:
 # docker-compose.yml
 # Start the container(s): docker compose -f docker-compose.yml --project-name fakeapi up -d
 # Stop the container(s): docker compose rm -f -s fakeapi redis
+version: "3.9"
 networks:
    backend:
       name: backend
@@ -47,8 +58,9 @@ services:
     image: redis:alpine
     deploy:
       replicas: 1
-    hostname: redis.lab
     container_name: redis.lab
+    hostname: redis.lab
+    domainname: backend.com
     networks:
        backend:
 ```

@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
 # Run a standalone container of FakeAPI and Redis
-Start the fakeAPI and Redis servers in a custom network, to have Docker's DNS for name resolution. In this example I'm using the network `backend`. Use an appropriate `hostname` if you start multiple containers. The logs will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
+Start the FakeAPI and Redis servers in a custom network, to have Docker's DNS for name resolution. In this example the network is `backend`. Use an appropriate `hostname` if you start multiple containers. The logs and page visited will print the `hostname`. That will help identify the container you are hitting, in case you have a load balancer. Remember my primary goal is to test API Gateways, Reverse Proxy and load balancer.
 
 ## Run the project with HTTP
 Starts the container with `HTTP` only.
@@ -38,17 +38,22 @@ Start Redis with the following command:
 ```sh
 docker run --name redis.lab --hostname redis.lab -d --rm --network backend redis
 ```
->**Note**: No need to map the Redis port on the Docker host, since it's only accessed by the FakeAPI. In case you want to expose the port, add `-p 6379:6379` to the command line.
+>**Note**: No need to map the Redis port on the Docker host, it's only accessed by the FakeAPI. In case you want to expose the port, add `-p 6379:6379` to the command line.
 
-**Optional:** You can start a Redis client for troubleshooting the Redis database. Note that the hostname is 'redis.lab' because we're in the same network as the server. Don't use 'localhost' as this container is in the same network as the Redis server and Docker's DNS will take care of the name resolution:
+**Optional:** You can start a Redis client for troubleshooting the Redis database. Note that the hostname for the Redis server is `redis.lab` because we're in the same network as the Redis server.
 ```sh
 docker run -it --rm --network backend --name redis.cli redis redis-cli -h redis.lab
 ```
 
 ## Custom network (optional)
-FakeAPI runs on a custom Docker network. This workshop is not about Docker custom network but I you can't avoid to run this project in custom networks to get the added value of a DNS server. The following command was used to create the `backend` network.
+FakeAPI runs on a custom Docker network to get the added value of Docker DNS server. The following command was used to create the `backend` network.
 
 ```sh
 docker network create --driver=bridge --subnet=172.31.11.0/24 --ip-range=172.31.11.128/25 --gateway=172.31.11.1 backend
+```
+## Logging
+In case you run into problems, you can start logging with the command:
+```sh
+docker logs -f server1
 ```
 <p align="left">(<a href="README.md">back to the main page</a>)</p>

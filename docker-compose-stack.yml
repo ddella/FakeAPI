@@ -13,14 +13,15 @@ networks:
 services:
   fakeapi:
     hostname: "{{.Service.Name}}-{{.Node.ID}}"
+    domainname: backend.com
     image: fakeapi
     ports:
       - "9445:9445"
     deploy:
       replicas: 6
     environment:
-      - REDIS_HOSTNAME=redis.lab \
-      - REDIS_PORT=6379 \
+      - REDIS_HOSTNAME=redis.lab
+      - REDIS_PORT=6379
       - FAKEAPI_INTF=0.0.0.0
       - FAKEAPI_PORT=9445
       - FAKEAPI_SERVER_KEY=server-key.pem
@@ -33,5 +34,6 @@ services:
     deploy:
       replicas: 1
     hostname: redis.lab
+    domainname: backend.com
     networks:
        backend:
