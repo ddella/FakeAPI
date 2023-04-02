@@ -31,7 +31,7 @@ Use the command to clone the project on your local drive:
 gh repo clone ddella/FakeAPI
 ```
 
-If you can't use `gh` to download the project, you can use `cURL`:
+The prefered method to clone the project is with `gh` but if you can't use it, use `cURL` to download it to your local drive:
 ```sh
 curl -L -o fakeapi.zip https://github.com/ddella/FakeAPI/archive/refs/heads/main.zip
 unzip fakeapi.zip
@@ -39,9 +39,9 @@ cd FakeAPI-main
 ```
 
 ## Build the Docker image
-You need to build the Docker image to run a container.
+You need to build the Docker image to run containers.
 
-This is the `Dockerfile` needed to build the Docker image:
+This is the `Dockerfile` needed to build the image:
 ```Dockerfile
 # Use the following command to build the Docker image:
 #   docker build -t fakeapi:2.0 .

@@ -7,6 +7,8 @@ Using Compose is essentially a three-step process:
 2. Define the services that make up your app in `docker-compose.yml` so they can be run together in an isolated environment.
 3. Run docker compose up and the Docker compose command starts and runs your entire app.
 
+>Step 1 was already covered at the beginning of the tutorial
+
 ## Docker Compose commands to start the FakeAPI Server
 This is the `yaml` file to run the FakeAPI Server detached.
 
