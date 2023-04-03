@@ -101,28 +101,6 @@ async def docs():
 #     response.headers.update(headers)
 #     return
 
-@router.get("/api/keys", tags=["get"])
-async def get_all_keys():
-    # async def get_all_keys(request: Request) -> dict:
-    """
-    Returns all the resources. No parameter needed.
-    curl -H "Content-type: application/json" -H "Accept: application/json" -i -L  http://localhost:8000/api/keys
-    :return: All the elements
-    """
-    try:
-        all_the_keys = redis.keys('*')
-        dbsize = redis.dbsize()
-        logger.info(f'DB size: {dbsize} - Keys: {all_the_keys}')
-        return {"dbsize": dbsize, 'keys': all_the_keys}
-    except exceptions.ConnectionError:
-        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
-        logger.info(f'{strError}')
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=strError,
-            headers={"X-Fake-REST-API": strError},
-        )
-
 @router.get("/api/item/{item_id}", tags=["path_parameter"])
 def path_parameter_id(item_id: int):
     """

@@ -47,7 +47,6 @@ def add_item(item: Item) -> dict:
             detail=strError,
             headers={"X-Fake-REST-API": strError},
         )
-
     if result:
         strError = f"ID {item.id} already exists, adding item failed"
         logger.info(f'{strError}')

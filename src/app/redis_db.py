@@ -85,6 +85,70 @@ async def my_redis():
         )
     return generate_html_response(count)
 
+@router.delete('/api/redis/key/{key}', status_code=status.HTTP_200_OK, tags=["delete"])
+async def deleteKey(key: str) -> dict:
+    """
+    Use DELETE method to delete a specified key in the Redis database. If it doesn't exist, return 404.
+
+    Example with curl:
+        curl -X DELETE -H "Content-type: application/json" -H "Accept: application/json" \
+        -d '{"key": 123}' -i -L "http://localhost:8000/api/redis/key/{key}"
+    :param key: key to delete
+    :return: Deleted item or error 404 if not found
+    """
+    try:
+        result = redis.hgetall(key)
+        if not result:
+            strError = f"Key: {key} was found not found in Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+            logger.info(f'{strError}')
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=strError,
+                headers={"X-Fake-REST-API": strError},
+            )
+        try:
+            await redis.delete(key)
+        except exceptions.ConnectionError:
+            strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+            logger.info(f'{strError}')
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=strError,
+                headers={"X-Fake-REST-API": strError},
+            )
+        logger.info(f'Key: {key} was deleted from Redis database {REDIS_HOSTNAME}:{REDIS_PORT}')
+        return {"key": key, 'data': result}
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+@router.get("/api/redis/keys", tags=["get"])
+async def get_all_keys():
+    # async def get_all_keys(request: Request) -> dict:
+    """
+    Returns all the resources. No parameter needed.
+    curl -H "Content-type: application/json" -H "Accept: application/json" -i -L  http://localhost:8000/api/redis/keys
+    :return: All the elements
+    """
+    try:
+        all_the_keys = redis.keys('*')
+        dbsize = redis.dbsize()
+        logger.info(f'DB size: {dbsize} - Keys: {all_the_keys}')
+        return {"dbsize": dbsize, 'keys': all_the_keys}
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
 
 if __name__ == "__main__":
     import uvicorn
