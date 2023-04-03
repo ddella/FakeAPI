@@ -4,6 +4,7 @@
 **/__pycache__
 .gitignore.swp
 .env
+**/.idea
 00_Readme.txt
 blank-README.md
 *.pptx
