@@ -23,15 +23,15 @@ REST API methods implemented in FakeAPI are:
 * **HTTP PATCH** to make a partial update (only one field)
 * **HTTP TRACE** server reply with the header received in the body of the 
 
-# How to use this image
-## Clone the project
-Start by cloning the project using `gh`.
-Use the command to clone the project on your local drive:
+# Clone the project
+Copy all the files from this project to your local drive using `gh`.
+
+Use the command to clone the project:
 ```sh
 gh repo clone ddella/FakeAPI
 ```
 
-The prefered method to clone the project is with `gh` but if you can't use it, use `cURL` to download it to your local drive and unzip it:
+The prefered method to clone the project is with `gh` but if you can't use it because it's not installed on your host, use `cURL` to download it to your local drive and unzip it:
 ```sh
 curl -L -o fakeapi.zip https://github.com/ddella/FakeAPI/archive/refs/heads/main.zip
 unzip fakeapi.zip
@@ -40,7 +40,7 @@ cd FakeAPI-main
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Build the Docker image
-You need to build the Docker image to run containers. No matter the method used to start the containers. Whether you use the `docker` command line or a `yaml` file to start a container, the Docker image is the same.
+You need to build the Docker image to run containers, no matter the method used to start the containers. Whether you use the `docker` command line or a `yaml` file to start a container, the Docker image is the same.
 
 This is the `Dockerfile` needed to build the image:
 ```Dockerfile

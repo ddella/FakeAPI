@@ -68,9 +68,13 @@ services:
        backend:
 ```
 
+## Useful commands
+Command to list running compose projects:
 Somme commands to check the Swarm stack:
+
 ```sh
 docker stack ls
+docker service ls
 docker stack ps fakeapi
 docker stack services fakeapi
 ```
