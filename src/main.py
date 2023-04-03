@@ -41,24 +41,24 @@ if __name__ == "__main__":
     else:
         logging.info(f'HTTPS activated with Server Certificate={SERVER_CRT} - Server Private Key={SERVER_KEY}')
 
-    apps = FastAPI(openapi_tags=tags_metadata)
-    apps.include_router(delete.router)
-    apps.include_router(get.router)
-    apps.include_router(head.router)
-    apps.include_router(options.router)
-    apps.include_router(patch.router)
-    apps.include_router(post.router)
-    apps.include_router(put.router)
-    apps.include_router(trace.router)
+    app = FastAPI(openapi_tags=tags_metadata)
+    app.include_router(delete.router)
+    app.include_router(get.router)
+    app.include_router(head.router)
+    app.include_router(options.router)
+    app.include_router(patch.router)
+    app.include_router(post.router)
+    app.include_router(put.router)
+    app.include_router(trace.router)
 
     # JWT auth modules
-    apps.include_router(users.router)
+    app.include_router(users.router)
 
     # Redis example
-    apps.include_router(redis.router)
+    app.include_router(redis.router)
 
     # Start the server
-    uvicorn.run(apps, host=HOSTNAME, port=PORT,
+    uvicorn.run(app, host=HOSTNAME, port=PORT,
                 ssl_keyfile=SERVER_KEY,
                 ssl_certfile=SERVER_CRT,
                 # ssl_ca_certs="ca-chain.pem",
