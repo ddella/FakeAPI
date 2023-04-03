@@ -16,10 +16,9 @@ Type of parameter(s) passed with the API:
 
 from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import RedirectResponse
-from app.definitions import IDPrice
-from app.redis_db import redis
-from app.definitions import REDIS_HOSTNAME, REDIS_PORT
 from redis import exceptions
+from app.redis_db import redis
+from app.definitions import IDPrice, REDIS_HOSTNAME, REDIS_PORT
 from app.logs import logger
 
 router = APIRouter()
@@ -57,6 +56,31 @@ def get_id_price(item_id, price) -> dict:
             detail=strError,
             headers={"X-Fake-REST-API": strError},
         )
+
+def get_id(item_id: int) -> dict:
+    # Hash GETALL
+    key = 'item:' + str(item_id)
+    try:
+        result = redis.hgetall(key)
+    except exceptions.ConnectionError:
+        strError = f"Connection error: Redis database {REDIS_HOSTNAME}:{REDIS_PORT}"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    if not result:
+        strError = f"Item with ID {item_id} was not found"
+        logger.info(f'{strError}')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=strError,
+            headers={"X-Fake-REST-API": strError},
+        )
+
+    return {"Item": result}
 
 @router.get("/", response_class=RedirectResponse, include_in_schema=False)
 async def docs():
@@ -99,8 +123,22 @@ async def get_all_keys():
             headers={"X-Fake-REST-API": strError},
         )
 
+@router.get("/api/item/{item_id}", tags=["path_parameter"])
+def path_parameter_id(item_id: int):
+    """
+    The value of the path parameter 'item_id' will be passed to the function path_parameter()
+    as the argument 'item_id'. The name of the path parameter MUST be identical to the function argument.
+
+    Example with curl:
+        curl -H "Content-type: application/json" \
+        -H "Accept: application/json" -i -L "http://127.0.0.1:8000/api/item/{item_id}"
+    :param item_id: The ID of the resource we want to retreive
+    :return:
+    """
+    return get_id(item_id)
+
 @router.get("/api/item/price/{item_id}/{price}", tags=["path_parameter"])
-def path_parameter(item_id: int, price: float):
+def path_parameter_id_price(item_id: int, price: float):
     """
     Path parameters help scope the API call down to a single resource, which means you don’t have to build a body for
     something as simple as a resource finder.

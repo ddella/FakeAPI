@@ -1,9 +1,8 @@
 # app/delete.py
 # https://fastapi.tiangolo.com/it/tutorial/bigger-applications/
 from fastapi import status, HTTPException, APIRouter
-from app.definitions import ItemID
 from app.redis_db import redis
-from app.definitions import REDIS_HOSTNAME, REDIS_PORT
+from app.definitions import ItemID, REDIS_HOSTNAME, REDIS_PORT
 from redis import exceptions
 from app.logs import logger
 
