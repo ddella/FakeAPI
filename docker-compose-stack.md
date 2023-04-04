@@ -11,12 +11,18 @@ One of the key advantages of swarm services over standalone containers is that y
 
 ## Docker Swarm Stack commands
 
-1. To start the FakeAPI and Redis containers in a Docker Swarm as a stack, type the following command:
+1. To create the custom network, type the following command on the **manager** node only:
+```sh
+docker network create -d overlay --subnet=172.21.5.0/24 \
+--gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
+```
+
+2. To start the FakeAPI and Redis containers in a Docker Swarm as a stack, type the following command:
 
 ```sh
 docker stack deploy -c docker-compose-stack.yml fakeapi
 ```
-2. To stop the stack of FakeAPI and Redis containers in a Docker Swarm, type the following command:
+3. To stop the stack of FakeAPI and Redis containers in a Docker Swarm, type the following command:
 
 ```sh
 docker stack rm fakeapi
@@ -34,6 +40,7 @@ The `docker-compose-stack.yml` file to start multiple copies of FakeAPI with one
 # Create the network, on the manager node **ONLY**
 #   docker network create -d overlay --subnet=172.21.5.0/24 \
 #   --gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
+version: '3.9'
 networks:
    backend:
       name: ovrl_stack_fakeapi
@@ -42,11 +49,11 @@ networks:
 services:
   fakeapi:
     hostname: "{{.Service.Name}}-{{.Node.ID}}"
-    domainname: backend.com
     image: fakeapi:2.0
     ports:
       - "8000:8000"
     deploy:
+      mode: replicated
       replicas: 6
     environment:
       - REDIS_HOSTNAME=redis.lab
@@ -63,7 +70,6 @@ services:
     deploy:
       replicas: 1
     hostname: redis.lab
-    domainname: backend.com
     networks:
        backend:
 ```

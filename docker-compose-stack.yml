@@ -4,6 +4,7 @@
 # Create the network, on the manager node **ONLY**
 #   docker network create -d overlay --subnet=172.21.5.0/24 \
 #   --gateway=172.21.5.1 --ip-range 172.21.5.224/27 --attachable ovrl_stack_fakeapi
+version: '3.9'
 networks:
    backend:
       name: ovrl_stack_fakeapi
@@ -12,11 +13,11 @@ networks:
 services:
   fakeapi:
     hostname: "{{.Service.Name}}-{{.Node.ID}}"
-    domainname: backend.com
     image: fakeapi:2.0
     ports:
       - "8000:8000"
     deploy:
+      mode: replicated
       replicas: 6
     environment:
       - REDIS_HOSTNAME=redis.lab
@@ -33,6 +34,5 @@ services:
     deploy:
       replicas: 1
     hostname: redis.lab
-    domainname: backend.com
     networks:
        backend:

@@ -33,6 +33,7 @@ The `docker-compose.yml` file:
 # docker-compose.yml
 # Start the container(s): docker compose -f docker-compose.yml --project-name fakeapi up -d
 # Stop the container(s): docker compose rm -f -s fakeapi redis
+version: '3.9'
 networks:
    backend:
       name: backend
